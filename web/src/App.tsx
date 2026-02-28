@@ -227,7 +227,7 @@ function SwimlaneView({ events, stickyHeight, onEventClick, currentDate, current
   const cols = activeRegions.length
 
   return (
-    // Wrapper scrolls both axes internally — this keeps position:sticky working
+    // Wrapper is the scroll container (both axes); top:0 sticky = right below sticky-bar
     <div className="sl-wrapper" style={{ maxHeight: `calc(100vh - ${stickyHeight}px)` }}>
       <div
         className="sl-grid"

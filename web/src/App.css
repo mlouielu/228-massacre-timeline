@@ -1208,13 +1208,25 @@ button.ref-num:hover {
     margin-bottom: 0.35rem;
   }
 
-  /* Live banner: allow wrapping on narrow screens */
+  /* Live banner: single compact row — never wrap even at large font sizes */
   .live-banner {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
-    gap: 0.4rem;
-    padding: 0.25rem 0.6rem;
+    gap: 0.35rem;
+    padding: 0.2rem 0.5rem;
   }
+  /* Stretch children to equal height so date block matches clock-item height */
+  .live-banner { align-items: stretch; }
+  .live-text   { justify-content: center; }
+  /* "歷史上的今天" label is redundant next to the date — hide to save width */
+  .live-title { display: none; }
+  .live-date  { font-size: 0.8rem; }
+  /* Hide reader timezone on mobile — local time is always in the status bar */
+  .live-banner .clock-sep,
+  .live-banner .clock-item:last-child { display: none; }
+  /* Tighten clock sizes so Taiwan time fits on the same row as the date */
+  .live-banner .clock-label { font-size: 0.52rem; }
+  .live-banner .clock-value { font-size: 0.78rem; }
 
   /* Date nav: horizontal scroll */
   .date-nav {
@@ -1269,8 +1281,7 @@ button.ref-num:hover {
     line-height: 1.85;
   }
 
-  /* Clock rows */
-  .clock-row,
+  /* Standalone clock row (outside live-banner) */
   .clock-row-static {
     flex-wrap: wrap;
     justify-content: center;

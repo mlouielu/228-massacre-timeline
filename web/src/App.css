@@ -1220,7 +1220,8 @@ button.ref-num:hover {
   .live-text   { justify-content: center; }
   /* "歷史上的今天" label is redundant next to the date — hide to save width */
   .live-title { display: none; }
-  .live-date  { font-size: 0.8rem; }
+  /* font-size × line-height = (0.52 + 0.78) × 1.2 = 1.56rem (clock-item total height) */
+  .live-date  { font-size: 1.2rem; line-height: 1.3; }
   /* Hide reader timezone on mobile — local time is always in the status bar */
   .live-banner .clock-sep,
   .live-banner .clock-item:last-child { display: none; }

@@ -8,6 +8,13 @@
 
 .app--swimlane {
   padding-bottom: 0;
+  max-width: 98vw;
+}
+
+.app--swimlane .sticky-bar {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ── Sticky bar (header + date nav) ── */
@@ -411,14 +418,15 @@ header h1 {
 /* ── Swimlane ── */
 .sl-wrapper {
   overflow: auto;
-  margin: 0 -1rem;
+  width: 100%;
   scrollbar-width: thin;
   scrollbar-color: #333 transparent;
 }
 
 .sl-grid {
   display: grid;
-  min-width: max-content;
+  width: max-content;
+  margin: 0 auto;
 }
 
 /* Header row */
@@ -940,8 +948,8 @@ button.ref-num:hover {
   .city-nav button { padding: 0.25rem 0.55rem; }
   .city-row { padding-bottom: 0.4rem; }
 
-  /* Swimlane wrapper bleeds on mobile too */
-  .sl-wrapper { margin: 0 -0.75rem; }
+  /* Swimlane wrapper fills the app container */
+  .sl-wrapper { width: 100%; }
 
   /* Events */
   .event {

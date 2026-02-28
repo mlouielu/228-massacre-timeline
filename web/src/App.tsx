@@ -231,10 +231,7 @@ function SwimlaneView({ events, stickyHeight, onEventClick, currentDate, current
     <div className="sl-wrapper" style={{ height: `calc(100vh - ${stickyHeight}px)` }}>
       <div
         className="sl-grid"
-        style={{
-          width: '100%',
-          gridTemplateColumns: `44px repeat(${cols}, 60px)`,
-        }}
+        style={{ gridTemplateColumns: `44px repeat(${cols}, 60px)` }}
       >
         {/* Sticky region header — top:0 within the scroll container */}
         <div className="sl-head sl-head-corner" />

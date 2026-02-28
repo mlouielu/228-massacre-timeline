@@ -6,6 +6,10 @@
 
 **→ [mlouielu.github.io/228-massacre-timeline](https://mlouielu.github.io/228-massacre-timeline/)**
 
+| 時間軸 | 並行 |
+|--------|------|
+| ![Timeline view](assets/timeline.png) | ![Swimlane view](assets/swimlane.png) |
+
 ## 資料來源
 
 「二二八事件」研究報告

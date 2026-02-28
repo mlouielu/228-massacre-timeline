@@ -109,6 +109,15 @@ header h1 {
   flex-shrink: 0;
 }
 
+.source-modal-desc {
+  font-size: 0.78rem;
+  color: #777;
+  line-height: 1.7;
+  margin: 0.5rem 0 0.35rem;
+  border-left: 2px solid #333;
+  padding-left: 0.7em;
+}
+
 /* ── Live banner ── */
 .live-banner {
   display: inline-flex;

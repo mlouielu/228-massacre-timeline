@@ -132,10 +132,11 @@ function formatTaiwanClock(d: Date): string {
 // ── Report source ──────────────────────────────────────────────────────────
 
 const REPORT_SOURCE = {
-  label:     '行政院版',
+  label:     '行政院1992報告版',
   title:     '「二二八事件」研究報告',
   author:    '行政院研究二二八事件小組',
   publisher: '財團法人二二八事件紀念基金會',
+  description: '1991年行政院成立二二八研究小組，重新撰寫二二八事件調查報告，於1992年2月公開內容。此報告已修改過去「暴動」、「暴民」之說，對事件發生的經過敘述詳細，但囿於當時政治環境，未能觸及二二八責任歸屬的問題。- 二二八事件責任歸屬研究報告。',
   links: [
     { label: '行政院《「二二八事件」研究報告》摘要 - 財團法人二二八事件紀念基金會', url: 'https://www.228.org.tw/incident-research1' },
     { label: '行政院「二二八事件」研究報告 - 電子書（Kobo）ISBN 978-626-995-170-3',  url: 'https://www.kobo.com/tw/zh/ebook/GcO8yoYwjzSAmClmFn8INA' },
@@ -814,6 +815,7 @@ export default function App() {
             <div className="modal-body">
               <p className="source-modal-meta"><span>著者</span>{REPORT_SOURCE.author}</p>
               <p className="source-modal-meta"><span>出版</span>{REPORT_SOURCE.publisher}</p>
+              <p className="source-modal-desc">{REPORT_SOURCE.description}</p>
               <ul className="source-modal-links">
                 {REPORT_SOURCE.links.map(l => (
                   <li key={l.url}>

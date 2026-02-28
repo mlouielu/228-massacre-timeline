@@ -387,6 +387,7 @@ export default function App() {
   const [expandedCtx, setExpandedCtx]   = useState<Set<string>>(new Set())
   const [aboutOpen, setAboutOpen]        = useState(false)
   const [sourceOpen, setSourceOpen]      = useState<{ eventId: string; source: string } | null>(null)
+  const [anchorId, setAnchorId]          = useState<string | null>(null)
   const [viewMode, setViewMode]          = useState<'timeline' | 'swimlane'>('timeline')
   const [slDetail, setSlDetail]          = useState<(TimelineEvent & { idx: number }) | null>(null)
   const activeRef       = useRef<HTMLDivElement | null>(null)
@@ -558,6 +559,7 @@ export default function App() {
       if (eventId) {
         hashLockRef.current = true
         history.replaceState(null, '', '#' + eventId)
+        setAnchorId(eventId)
         setTimeout(() => { hashLockRef.current = false }, 1200)
       }
     }
@@ -572,17 +574,19 @@ export default function App() {
       if (raf !== null) return
       raf = requestAnimationFrame(() => {
         raf = null
-        const line = stickyHeight + 20  // detection line just below sticky bar
+        const center = stickyHeight + (window.innerHeight - stickyHeight) / 2
         let current = ''
+        let bestDist = Infinity
         for (const el of document.querySelectorAll<HTMLElement>('.event[id]')) {
-          if (el.getBoundingClientRect().top <= line) {
-            current = el.id   // keep updating — last one above the line wins
-          } else {
-            break             // events are in DOM order, safe to stop early
-          }
+          const rect = el.getBoundingClientRect()
+          const mid = rect.top + rect.height / 2
+          const dist = Math.abs(mid - center)
+          if (dist < bestDist) { bestDist = dist; current = el.id }
         }
-        if (current && window.location.hash !== '#' + current && !hashLockRef.current) {
-          history.replaceState(null, '', '#' + current)
+        if (current && !hashLockRef.current) {
+          if (window.location.hash !== '#' + current)
+            history.replaceState(null, '', '#' + current)
+          setAnchorId(current)
         }
       })
     }
@@ -614,6 +618,7 @@ export default function App() {
     if (/^E\d+$/.test(hash)) hash = `EY-${hash}`
     hasScrolledHash.current = true
     setSelectedDate(null)
+    setAnchorId(hash)
     setTimeout(() => {
       document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }, 50)
@@ -849,7 +854,7 @@ export default function App() {
               <div
                 key={idx}
                 id={event.event_id}
-                className={['event', isActive ? 'active' : '', isPast ? 'past' : '', isMartialLaw ? 'martial-law' : '', isOrigin ? 'origin' : '', isMassacre ? 'massacre' : ''].filter(Boolean).join(' ')}
+                className={['event', isActive ? 'active' : '', anchorId === event.event_id ? 'anchored' : '', isPast ? 'past' : '', isMartialLaw ? 'martial-law' : '', isOrigin ? 'origin' : '', isMassacre ? 'massacre' : ''].filter(Boolean).join(' ')}
                 ref={isActive ? activeRef : null}
               >
                 <div className="event-meta">

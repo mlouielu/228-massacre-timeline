@@ -416,6 +416,13 @@ header h1 {
   scroll-margin-top: 240px;
 }
 
+.event.anchored {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  border-left: 3px solid rgba(86, 180, 233, 0.45);
+  scroll-margin-top: 240px;
+}
+
 .event-meta {
   display: flex;
   flex-direction: column;

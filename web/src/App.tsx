@@ -191,22 +191,13 @@ const SOURCES: Record<string, SourceMeta> = {
 
 // ── Date labels ────────────────────────────────────────────────────────────
 
-const DATE_LABELS: Record<string, string> = {
-  '02-27': '2月27日', '02-28': '2月28日',
-  '03-01': '3月1日',  '03-02': '3月2日',  '03-03': '3月3日',
-  '03-04': '3月4日',  '03-05': '3月5日',  '03-06': '3月6日',
-  '03-07': '3月7日',  '03-08': '3月8日',  '03-09': '3月9日',
-  '03-10': '3月10日', '03-11': '3月11日', '03-12': '3月12日',
-  '03-13': '3月13日', '03-14': '3月14日', '03-15': '3月15日',
-  '03-17': '3月17日',
-  '04-03': '4月3日',  '04-04': '4月4日',  '04-05': '4月5日',
-  '04-06': '4月6日',  '04-07': '4月7日',  '04-08': '4月8日',
-  '04-10': '4月10日', '04-11': '4月11日', '04-16': '4月16日',
-  '04-19': '4月19日',
-}
-
-function labelFor(isoDate: string): string {
-  return DATE_LABELS[isoDate.slice(5)] ?? isoDate
+// isoDate = 'YYYY-MM-DD'
+// showYear=false → omit year for 1947 dates (compact nav buttons)
+// showYear=true  → always include year (day banners, live clock, swimlane)
+function labelFor(isoDate: string, showYear = false): string {
+  const [y, m, d] = isoDate.split('-').map(Number)
+  const md = `${m}月${d}日`
+  return (showYear || y !== 1947) ? `${y}年${md}` : md
 }
 
 // ── City → Region normalisation ────────────────────────────────────────────
@@ -329,7 +320,7 @@ function SwimlaneView({ events, stickyHeight, onEventClick, currentDate, current
                 className={['sl-date-sep', isCurrentDate ? 'current' : ''].filter(Boolean).join(' ')}
                 style={{ gridColumn: `1 / span ${cols + 1}` }}
               >
-                1947年{labelFor(date)}
+                {labelFor(date, true)}
               </div>
 
               {hours.map(hour => {
@@ -499,8 +490,15 @@ export default function App() {
   const currentMinutes = tw.minutes
   const isHistoricalPeriod = events.some(e => e.date === currentDate)
 
+  // Date range boundaries
+  const DATE_CORE_START = '1947-02-17'
+  const DATE_CORE_END   = '1947-05-16'
+
   // Compute filtered list early — used in effects below
   const allDates = [...new Set(events.map(e => e.date))].sort()
+  const coreDates   = allDates.filter(d => d >= DATE_CORE_START && d <= DATE_CORE_END)
+  const hasBefore   = allDates.some(d => d < DATE_CORE_START)
+  const hasAfter    = allDates.some(d => d > DATE_CORE_END)
 
   // Normalise 臺→台 so both variants match the same city
   const normCity = (s: string) => s.replace(/臺/g, '台')
@@ -515,15 +513,22 @@ export default function App() {
   ]
   const allCities = CITY_ORDER.filter(c => events.some(e => normCity(e.city) === c))
 
+  const dateFilter = (date: string) => {
+    if (selectedDate === null)        return true
+    if (selectedDate === '__before__') return date < DATE_CORE_START
+    if (selectedDate === '__after__')  return date > DATE_CORE_END
+    return date === selectedDate
+  }
+
   const filteredEvents = events
     .map((e, i) => ({ ...e, idx: i }))
-    .filter(e => selectedDate === null || e.date === selectedDate)
+    .filter(e => dateFilter(e.date))
     .filter(e => selectedCity === null || normCity(e.city) === selectedCity)
 
   // Swimlane ignores city filter — showing all regions is the point
   const swimlaneEvents = events
     .map((e, i) => ({ ...e, idx: i }))
-    .filter(e => selectedDate === null || e.date === selectedDate)
+    .filter(e => dateFilter(e.date))
 
   // Find the event on today's historical date whose time is closest to now
   useEffect(() => {
@@ -692,7 +697,7 @@ export default function App() {
             <div className="live-banner">
               <span className="live-text">
                 <span className="live-title">歷史上的今天</span>
-                <span className="live-date">1947年{labelFor(currentDate)}</span>
+                <span className="live-date">{labelFor(currentDate, true)}</span>
               </span>
               <div className="clock-row">
                 <span className="clock-item">
@@ -726,7 +731,13 @@ export default function App() {
             className={selectedDate === null ? 'active' : ''}
             onClick={() => setSelectedDate(null)}
           >全部</button>
-          {allDates.map(d => (
+          {hasBefore && (
+            <button
+              className={selectedDate === '__before__' ? 'active' : ''}
+              onClick={() => setSelectedDate(prev => prev === '__before__' ? null : '__before__')}
+            >事件前</button>
+          )}
+          {coreDates.map(d => (
             <button
               key={d}
               className={[
@@ -738,6 +749,12 @@ export default function App() {
               {labelFor(d)}
             </button>
           ))}
+          {hasAfter && (
+            <button
+              className={selectedDate === '__after__' ? 'active' : ''}
+              onClick={() => setSelectedDate(prev => prev === '__after__' ? null : '__after__')}
+            >事件後</button>
+          )}
         </nav>
 
         <div className="city-row">
@@ -797,7 +814,7 @@ export default function App() {
                   style={{ top: stickyHeight }}
                   ref={isDayToday ? todayRef : null}
                 >
-                  <span className="day-banner-label">1947年{labelFor(event.date)}</span>
+                  <span className="day-banner-label">{labelFor(event.date, true)}</span>
                 </div>
               )
               lastDate = event.date
@@ -961,10 +978,10 @@ export default function App() {
             </div>
             <div className="modal-body">
               {slDetail.time_precision === 'exact' && (
-                <p className="sl-detail-time">{labelFor(slDetail.date)} {formatTimeChinese(slDetail.time_local)}</p>
+                <p className="sl-detail-time">{labelFor(slDetail.date, true)} {formatTimeChinese(slDetail.time_local)}</p>
               )}
               {slDetail.time_precision === 'fuzzy' && slDetail.time_label && (
-                <p className="sl-detail-time">{labelFor(slDetail.date)} {slDetail.time_label}</p>
+                <p className="sl-detail-time">{labelFor(slDetail.date, true)} {slDetail.time_label}</p>
               )}
               <p className="sl-detail-text">{slDetail.event_zh}</p>
               <div className="sl-detail-actions">

@@ -63,6 +63,7 @@ header h1 {
   text-decoration: none;
   cursor: pointer;
   font-family: inherit;
+  flex-shrink: 0;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
   white-space: nowrap;
 }
@@ -363,6 +364,7 @@ header h1 {
   line-height: 1;
   letter-spacing: 0.02em;
   align-self: flex-start;
+  flex-shrink: 0;
   white-space: nowrap;
 }
 
@@ -407,6 +409,7 @@ header h1 {
   font-weight: 700;
   color: #e55;
   font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
 }
 
 .event-time.fuzzy {
@@ -1137,9 +1140,21 @@ button.ref-num:hover {
   .event-meta {
     flex-direction: row;
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0.3rem;
     margin-bottom: 0.35rem;
+    overflow: hidden;
+  }
+  .event-location {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+  .event-region {
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .event-anchor {
+    align-self: center;
   }
   .event-text {
     font-size: 0.92rem;

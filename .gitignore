@@ -1,0 +1,41 @@
+# ── Python ──────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# ── Node / Web ───────────────────────────────────────────────────────────────
+web/node_modules/
+web/dist/
+web/dist-ssr/
+*.local
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ── EPUB source (large binary, not for VCS) ──────────────────────────────────
+report/*.epub
+
+# ── Editor & OS ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.sw?
+
+# ── Emacs autosaves & lockfiles ──────────────────────────────────────────────
+*~
+\#*\#
+.\#*
+
+# ── Data scratch files ───────────────────────────────────────────────────────
+data/test_*.csv
+
+# ── EPUB extraction cache ─────────────────────────────────────────────────────
+data/.epub_cache/

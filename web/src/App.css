@@ -1,0 +1,846 @@
+/* ── Layout ── */
+.app {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 1rem 4rem;
+  font-family: 'Noto Serif TC', 'Source Han Serif TC', serif, system-ui;
+}
+
+/* ── Sticky bar (header + date nav) ── */
+.sticky-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  /* Bleed the background past the .app padding so there's no gap at edges */
+  margin: 0 -1rem;
+  padding: 0 1rem;
+  background: #141414;
+  /* Subtle shadow to separate from scrolling content */
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Header ── */
+header {
+  text-align: center;
+  padding: 0.75rem 0 0.6rem;
+  border-bottom: 2px solid #b00;
+}
+
+header h1 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0 0 0.1rem;
+  letter-spacing: 0.05em;
+}
+
+.subtitle {
+  color: #888;
+  font-size: 0.78rem;
+  margin: 0 0 0.5rem;
+}
+
+/* ── Live banner ── */
+.live-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #1a0000;
+  border: 1px solid #b00;
+  border-radius: 6px;
+  padding: 0.3rem 0.9rem;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.live-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.05rem;
+}
+
+.live-title {
+  font-size: 0.7rem;
+  color: #f88;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.live-date {
+  font-size: 0.88rem;
+  color: #faa;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* ── Clock row (inside live-banner and standalone) ── */
+.clock-row,
+.clock-row-static {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.clock-row-static {
+  justify-content: center;
+  padding-bottom: 0.35rem;
+  color: #666;
+}
+
+.clock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.2;
+}
+
+.clock-label {
+  font-size: 0.58rem;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.clock-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #bbb;
+}
+
+.clock-value.tw {
+  color: #e88;
+}
+
+.clock-sep {
+  color: #555;
+  padding: 0 0.1rem;
+  margin-top: 0.6rem;
+}
+
+/* ── Date nav ── */
+.date-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 1rem 0;
+  justify-content: center;
+}
+
+.date-nav button {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.date-nav button:hover {
+  border-color: #aaa;
+}
+
+.date-nav button.active {
+  background: #222;
+  border-color: #ccc;
+  font-weight: 600;
+}
+
+.date-nav button.today {
+  border-color: #b00;
+  color: #e55;
+}
+
+.date-nav button.today.active {
+  background: #300;
+}
+
+/* ── City nav ── */
+.city-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0 0 0.75rem;
+}
+
+.city-nav-label {
+  font-size: 0.65rem;
+  color: #555;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding-right: 0.25rem;
+  white-space: nowrap;
+}
+
+.city-nav button {
+  font-size: 0.73rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  border: 1px solid #333;
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.city-nav button:hover {
+  border-color: #777;
+  color: #ccc;
+}
+
+.city-nav button.active {
+  background: #222;
+  border-color: #aaa;
+  color: #eee;
+  font-weight: 600;
+}
+
+/* ── Timeline ── */
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Day banner ── */
+.day-banner {
+  position: sticky;
+  /* top is set via inline style from JS (sticky-bar height) */
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.75rem 0 0.5rem;
+  /* Bleed background to cover events scrolling behind */
+  background: #141414;
+  padding: 0.35rem 0;
+}
+
+.day-banner::before,
+.day-banner::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #333;
+}
+
+.day-banner-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #666;
+  white-space: nowrap;
+  padding: 0 0.25rem;
+}
+
+.day-banner.today .day-banner-label {
+  color: #e55;
+}
+
+.day-banner.today::before,
+.day-banner.today::after {
+  background: #600;
+}
+
+.day-banner.past .day-banner-label {
+  color: #555;
+}
+
+.day-banner:first-child {
+  margin-top: 0.75rem;
+}
+
+.event {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 0 1.25rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid #2a2a2a;
+  transition: background 0.2s;
+  scroll-margin-top: 240px;
+}
+
+/* ── Per-event anchor/share button ── */
+.event-anchor {
+  background: none;
+  border: none;
+  font-size: 0.65rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: #444;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  align-self: flex-start;
+  white-space: nowrap;
+}
+
+.event-anchor:hover {
+  color: #e55;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.event-anchor.copied {
+  color: #5a5;
+}
+
+.event.past .event-text {
+  color: #bbb;
+}
+
+.event.active {
+  background: #1a0a0a;
+  border-radius: 6px;
+  padding: 0.9rem 0.75rem;
+  border-left: 3px solid #b00;
+  border-bottom: 1px solid #3a1a1a;
+  /* Ensure sticky bar doesn't obscure the highlighted event when scrolled to */
+  scroll-margin-top: 240px;
+}
+
+.event-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-top: 0.1rem;
+}
+
+.event-date {
+  font-size: 0.75rem;
+  color: #888;
+  font-weight: 500;
+}
+
+.event-time {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e55;
+  font-variant-numeric: tabular-nums;
+}
+
+.event-time.fuzzy {
+  color: #a44;
+  font-weight: 500;
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+}
+
+.event-location {
+  font-size: 0.72rem;
+  background: #2a2a2a;
+  color: #ccc;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+  align-self: flex-start;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-region {
+  font-size: 0.65rem;
+  color: #666;
+  letter-spacing: 0.04em;
+}
+
+.event-text {
+  font-size: 0.9rem;
+  line-height: 1.8;
+  margin: 0;
+  color: #ddd;
+}
+
+/* ── Event context (原文) ── */
+.event-context {
+  grid-column: 1 / -1;
+  margin-top: 0.4rem;
+}
+
+.ctx-toggle {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  padding: 0.15rem 0.3rem;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  letter-spacing: 0.04em;
+  transition: color 0.15s, background 0.15s;
+}
+
+.ctx-toggle:hover {
+  color: #999;
+  background: rgba(255,255,255,0.05);
+}
+
+.ctx-toggle.open {
+  color: #888;
+}
+
+.ctx-arrow {
+  font-size: 0.55rem;
+}
+
+.ctx-text {
+  margin: 0.5rem 0 0.2rem;
+  padding: 0.55rem 0.8rem;
+  border-left: 2px solid #333;
+  font-size: 0.82rem;
+  line-height: 1.75;
+  color: #777;
+  font-style: normal;
+}
+
+/* ── Header links (關於 / GitHub) ── */
+.header-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.footer-sep {
+  color: #333;
+  font-size: 0.7rem;
+}
+
+.header-link {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.72rem;
+  color: #555;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.header-link:hover {
+  color: #999;
+}
+
+/* ── About modal ── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1rem 0.7rem;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.modal-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 0.2rem;
+  line-height: 1;
+  font-family: inherit;
+}
+
+.modal-close:hover { color: #ccc; }
+
+.modal-body {
+  padding: 0.9rem 1rem 1.1rem;
+  font-size: 0.82rem;
+  line-height: 1.8;
+  color: #aaa;
+}
+
+.modal-body p { margin: 0 0 0.75rem; }
+.modal-body p:last-child { margin-bottom: 0; }
+
+.modal-body ul {
+  margin: 0 0 0.75rem;
+  padding-left: 1.2rem;
+}
+
+.modal-body li {
+  margin-bottom: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.modal-body a {
+  color: #e88;
+  text-decoration: none;
+}
+
+.modal-body a:hover {
+  text-decoration: underline;
+}
+
+.modal-meta {
+  font-size: 0.73rem;
+  color: #555;
+}
+
+.modal-notice {
+  font-size: 0.76rem;
+  color: #666;
+  border-left: 2px solid #333;
+  padding-left: 0.65rem;
+}
+
+/* ── Jump-to-current FAB ── */
+.jump-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  background: #b00;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  transition: background 0.15s, transform 0.15s;
+  font-family: inherit;
+}
+
+.jump-btn:hover {
+  background: #d00;
+  transform: translateY(-2px);
+}
+
+.jump-arrow {
+  font-size: 1rem;
+  line-height: 1;
+  animation: bounce 1.6s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(3px); }
+}
+
+.jump-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* ── Reference number buttons ── */
+.ref-num {
+  display: inline;
+  font-size: 0.72em;
+  color: #888;
+  background: none;
+  border: none;
+  padding: 0 0.05em;
+  cursor: pointer;
+  font-family: inherit;
+  vertical-align: super;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+button.ref-num:hover {
+  color: #e55;
+  text-decoration: underline;
+}
+
+/* ── Reference popover ── */
+.ref-popover {
+  position: fixed;
+  z-index: 50;
+  background: #1e1e1e;
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ref-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.75rem 0.35rem;
+  border-bottom: 1px solid #333;
+}
+
+.ref-popover-id {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #888;
+}
+
+.ref-popover-close {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 0.2rem;
+  line-height: 1;
+  font-family: inherit;
+}
+
+.ref-popover-close:hover {
+  color: #ccc;
+}
+
+.ref-popover-text {
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: #bbb;
+  margin: 0;
+  padding: 0.6rem 0.75rem 0.7rem;
+  overflow-y: auto;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  /* Layout — tighter side padding */
+  .app {
+    padding: 0 0.75rem 5rem;
+  }
+
+  /* Fix sticky-bar negative margin to match new app padding */
+  .sticky-bar {
+    margin: 0 -0.75rem;
+    padding: 0 0.75rem;
+  }
+
+  /* Compact header */
+  header {
+    padding: 0.55rem 0 0.45rem;
+  }
+  header h1 {
+    font-size: 1.15rem;
+  }
+  .subtitle {
+    font-size: 0.72rem;
+    margin-bottom: 0.35rem;
+  }
+
+  /* Live banner: allow wrapping on narrow screens */
+  .live-banner {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.6rem;
+  }
+
+  /* Date + city navs: horizontal scroll — no wrap, no vertical overflow */
+  .date-nav,
+  .city-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    justify-content: flex-start;
+    padding: 0.55rem 0;
+    gap: 0.3rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .date-nav::-webkit-scrollbar,
+  .city-nav::-webkit-scrollbar { display: none; }
+  .date-nav button,
+  .city-nav button {
+    flex-shrink: 0;
+    min-height: 2rem;
+  }
+  .date-nav button { padding: 0.35rem 0.65rem; }
+  .city-nav button { padding: 0.25rem 0.55rem; }
+  .city-nav { padding-bottom: 0.55rem; }
+
+  /* Events */
+  .event {
+    grid-template-columns: 1fr;
+    padding: 0.75rem 0;
+  }
+  .event-meta {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 0.35rem;
+  }
+  .event-text {
+    font-size: 0.92rem;
+    line-height: 1.85;
+  }
+
+  /* Clock rows */
+  .clock-row,
+  .clock-row-static {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Jump button */
+  .jump-btn {
+    bottom: 1.25rem;
+    right: 1rem;
+    padding: 0.5rem 0.9rem;
+  }
+
+  /* Reference popover → bottom sheet */
+  .ref-popover {
+    position: fixed !important;
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-height: 55vh !important;
+    border-radius: 14px 14px 0 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+  }
+  /* Drag handle visual hint */
+  .ref-popover-header::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0.45rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2.5rem;
+    height: 3px;
+    background: #555;
+    border-radius: 2px;
+  }
+  .ref-popover-header {
+    position: relative;
+    padding-top: 1rem;
+  }
+}
+
+/* ── Light mode ── */
+@media (prefers-color-scheme: light) {
+  .sticky-bar {
+    background: #fafafa;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  }
+  .jump-btn {
+    background: #cc0000;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .jump-btn:hover { background: #aa0000; }
+
+  .live-banner {
+    background: #fff5f5;
+    border-color: #cc0000;
+  }
+  .live-title { color: #aa0000; }
+  .live-date  { color: #880000; }
+  .clock-value     { color: #333; }
+  .clock-value.tw  { color: #aa0000; }
+  .clock-label     { color: #999; }
+  .clock-row-static { color: #555; }
+  .clock-sep        { color: #bbb; }
+
+  .event            { border-bottom-color: #e8e8e8; }
+  .event.active     { background: #fff5f5; border-left-color: #cc0000; border-bottom-color: #f5cccc; }
+  .event-text       { color: #222; }
+  .event.past .event-text { color: #666; }
+  .event-date       { color: #999; }
+  .event-time       { color: #cc0000; }
+  .event-time.fuzzy { color: #993333; }
+  .event-location   { background: #f0f0f0; color: #444; }
+  .event-region     { color: #aaa; }
+
+  .date-nav button        { border-color: #ccc; }
+  .date-nav button.active { background: #f0f0f0; border-color: #888; }
+  .date-nav button.today  { border-color: #cc0000; color: #cc0000; }
+  .date-nav button.today.active { background: #ffe8e8; }
+
+  .city-nav-label         { color: #aaa; }
+  .city-nav button        { border-color: #ddd; color: #999; }
+  .city-nav button:hover  { border-color: #999; color: #444; }
+  .city-nav button.active { background: #f0f0f0; border-color: #888; color: #222; }
+
+  .day-banner { background: #fafafa; }
+
+  .event-anchor       { color: #bbb; }
+  .event-anchor:hover { color: #cc0000; background: rgba(0,0,0,0.04); }
+  .event-anchor.copied { color: #4a4; }
+
+  .ref-num { color: #aaa; }
+  button.ref-num:hover { color: #cc0000; }
+
+  .header-link      { color: #bbb; }
+  .header-link:hover { color: #555; }
+  .footer-sep       { color: #ccc; }
+
+  .modal            { background: #fff; border-color: #ddd; box-shadow: 0 16px 48px rgba(0,0,0,0.15); }
+  .modal-header     { border-bottom-color: #eee; }
+  .modal-close      { color: #bbb; }
+  .modal-close:hover { color: #555; }
+  .modal-body       { color: #444; }
+  .modal-body a     { color: #cc0000; }
+  .modal-meta       { color: #aaa; }
+  .modal-notice     { color: #888; border-left-color: #ddd; }
+
+  .ctx-toggle       { color: #bbb; }
+  .ctx-toggle:hover { color: #666; background: rgba(0,0,0,0.05); }
+  .ctx-toggle.open  { color: #888; }
+  .ctx-text         { border-left-color: #ddd; color: #888; }
+
+  .ref-popover {
+    background: #fff;
+    border-color: #ddd;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  }
+  .ref-popover-header { border-bottom-color: #eee; }
+  .ref-popover-id     { color: #aaa; }
+  .ref-popover-close  { color: #bbb; }
+  .ref-popover-close:hover { color: #555; }
+  .ref-popover-text   { color: #444; }
+}

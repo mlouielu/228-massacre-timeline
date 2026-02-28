@@ -351,7 +351,7 @@ function SwimlaneView({ events, stickyHeight, onEventClick, currentDate, current
                           {cellEvents.map(e => (
                             <p
                               key={e.idx}
-                              className={['sl-line', e.event_zh.includes('宣布戒嚴') ? 'martial-law' : '', e.event_zh.includes('到達現場') ? 'origin' : '', e.event_zh.includes('福州載運二千士兵') ? 'massacre' : ''].filter(Boolean).join(' ')}
+                              className={['sl-line', `sl-line--${e.source}`, e.event_zh.includes('宣布戒嚴') ? 'martial-law' : '', e.event_zh.includes('到達現場') ? 'origin' : '', e.event_zh.includes('福州載運二千士兵') ? 'massacre' : ''].filter(Boolean).join(' ')}
                               onClick={() => onEventClick(e)}
                             >
                               {e.event_zh}

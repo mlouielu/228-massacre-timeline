@@ -66,28 +66,28 @@ header h1 {
   border: 1px solid;
 }
 
-/* ey-1992: amber/gold */
+/* ey-1992: Wong orange (#E69F00) */
 .source-badge--ey-1992 {
-  color: #c8860a;
-  border-color: #6a4400;
-  background: rgba(180, 100, 0, 0.08);
+  color: #E69F00;
+  border-color: #8a5f00;
+  background: rgba(230, 159, 0, 0.08);
 }
 .source-badge--ey-1992:hover {
-  color: #e8a020;
-  border-color: #aa6600;
-  background: rgba(180, 100, 0, 0.16);
+  color: #f5b800;
+  border-color: #b07800;
+  background: rgba(230, 159, 0, 0.16);
 }
 
-/* mmf2025: forest green */
+/* mmf2025: Wong sky blue (#56B4E9) */
 .source-badge--mmf2025 {
-  color: #3a9e6f;
-  border-color: #1a5c3a;
-  background: rgba(40, 140, 80, 0.08);
+  color: #56B4E9;
+  border-color: #1a6a99;
+  background: rgba(86, 180, 233, 0.08);
 }
 .source-badge--mmf2025:hover {
-  color: #52c48a;
-  border-color: #2a8050;
-  background: rgba(40, 140, 80, 0.16);
+  color: #7ecbf5;
+  border-color: #2080bb;
+  background: rgba(86, 180, 233, 0.16);
 }
 
 .source-modal-event-id {
@@ -733,9 +733,13 @@ header h1 {
   text-overflow: ellipsis;
   cursor: pointer;
   border-radius: 2px;
-  padding: 0 2px;
+  padding: 0 2px 0 4px;
+  border-left: 2px solid transparent;
   transition: background 0.1s, color 0.1s;
 }
+
+.sl-line--ey-1992 { border-left-color: #E69F00; }  /* Wong orange */
+.sl-line--mmf2025 { border-left-color: #56B4E9; }  /* Wong sky blue */
 
 .sl-line:hover {
   background: rgba(255,255,255,0.07);
@@ -1358,10 +1362,10 @@ button.ref-num:hover {
   .sl-cell.current        { background: #fff8f8; }
   .sl-date-sep.current    { background: #fff0f0; color: #cc0000; border-color: #fcc; }
 
-  .source-badge--ey-1992       { color: #8a5c00; border-color: #c8960a; background: rgba(180, 120, 0, 0.07); }
-  .source-badge--ey-1992:hover { color: #6a4000; border-color: #8a6000; background: rgba(180, 120, 0, 0.14); }
-  .source-badge--mmf2025       { color: #1a6e45; border-color: #3aaa70; background: rgba(40, 140, 80, 0.07); }
-  .source-badge--mmf2025:hover { color: #0f4a2e; border-color: #2a8050; background: rgba(40, 140, 80, 0.14); }
+  .source-badge--ey-1992       { color: #7a5500; border-color: #c88a00; background: rgba(230, 159, 0, 0.07); }
+  .source-badge--ey-1992:hover { color: #5a3d00; border-color: #9a6800; background: rgba(230, 159, 0, 0.14); }
+  .source-badge--mmf2025       { color: #0d5a80; border-color: #2090c8; background: rgba(86, 180, 233, 0.07); }
+  .source-badge--mmf2025:hover { color: #083d57; border-color: #1070a0; background: rgba(86, 180, 233, 0.14); }
   .source-modal-meta  { color: #999; }
   .source-modal-meta span { color: #aaa; }
 

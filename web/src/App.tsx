@@ -361,14 +361,14 @@ export default function App() {
 
   // Load timeline CSV
   useEffect(() => {
-    fetch(`${import.meta.env.BASE_URL}timeline.csv`)
+    fetch(`${import.meta.env.BASE_URL}sources/ey-1992/timeline.csv`)
       .then(r => r.text())
       .then(t => setEvents(parseCSV(t) as unknown as TimelineEvent[]))
   }, [])
 
   // Load references CSV
   useEffect(() => {
-    fetch(`${import.meta.env.BASE_URL}references.csv`)
+    fetch(`${import.meta.env.BASE_URL}sources/ey-1992/references.csv`)
       .then(r => r.text())
       .then(t => {
         const rows = parseCSV(t)

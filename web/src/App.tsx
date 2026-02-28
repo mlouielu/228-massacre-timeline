@@ -642,6 +642,18 @@ export default function App() {
     }
     setSelectedDate(null)
     setSelectedCity(null)    // ensure active event is in the rendered list
+
+    // Scroll the "today" date button into the centre of the date nav
+    setTimeout(() => {
+      const nav = dateNavRef.current
+      const todayBtn = nav?.querySelector<HTMLElement>('button.today')
+      if (nav && todayBtn) {
+        const navCenter = nav.offsetWidth / 2
+        const btnCenter = todayBtn.offsetLeft + todayBtn.offsetWidth / 2
+        nav.scrollTo({ left: btnCenter - navCenter, behavior: 'smooth' })
+      }
+    }, 0)
+
     if (activeId !== null) {
       setJumpPending(true)
     } else {

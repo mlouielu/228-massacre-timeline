@@ -384,6 +384,54 @@ header h1 {
   color: #ddd;
 }
 
+/* ── Keyword box ── */
+.keyword-box {
+  display: inline;
+  border: 1.5px solid #dd5500;
+  border-radius: 3px;
+  padding: 0.05em 0.3em;
+  color: #ff7700;
+  font-weight: 700;
+  background: rgba(220, 85, 0, 0.15);
+  white-space: nowrap;
+}
+
+/* ── Martial law highlight ── */
+.event.martial-law {
+  background-color: #1a0e00;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 8px,
+    rgba(220, 100, 0, 0.08) 8px,
+    rgba(220, 100, 0, 0.08) 16px
+  );
+  border-left: 4px solid #dd5500;
+  border-radius: 6px;
+  padding: 1.75rem 0.75rem;
+  border-bottom: 1px solid #4a2000;
+}
+
+.event.martial-law .event-time {
+  color: #ff7700;
+}
+
+.event.martial-law .event-text {
+  color: #ffcc99;
+}
+
+.sl-line.martial-law {
+  color: #ff7700;
+  font-weight: 700;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    rgba(220, 100, 0, 0.12) 4px,
+    rgba(220, 100, 0, 0.12) 8px
+  );
+}
+
 /* ── View toggle ── */
 .view-toggle {
   display: flex;
@@ -1041,6 +1089,23 @@ button.ref-num:hover {
 
   .event            { border-bottom-color: #e8e8e8; }
   .event.active     { background: #fff5f5; border-left-color: #cc0000; border-bottom-color: #f5cccc; }
+  .keyword-box { border-color: #cc4400; color: #cc4400; background: rgba(200, 70, 0, 0.08); }
+
+  .event.martial-law {
+    background-color: #fff8f0;
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 8px,
+      rgba(220, 100, 0, 0.07) 8px,
+      rgba(220, 100, 0, 0.07) 16px
+    );
+    border-left-color: #dd5500;
+    border-bottom-color: #f0c090;
+  }
+  .event.martial-law .event-time { color: #cc4400; }
+  .event.martial-law .event-text { color: #663300; }
+  .sl-line.martial-law { color: #cc4400; }
   .event-text       { color: #222; }
   .event.past .event-text { color: #666; }
   .event-date       { color: #999; }

@@ -29,6 +29,21 @@ interface RefPopover {
   rect: DOMRect
 }
 
+// ── Keyword highlighter ────────────────────────────────────────────────────
+
+function highlightKeyword(nodes: ReactNode[], keyword: string, className: string): ReactNode[] {
+  return nodes.flatMap((node, i) => {
+    if (typeof node !== 'string') return [node]
+    const parts = node.split(keyword)
+    return parts.flatMap((part, j) => {
+      const result: ReactNode[] = [part]
+      if (j < parts.length - 1)
+        result.push(<span key={`kw-${i}-${j}`} className={className}>{keyword}</span>)
+      return result
+    })
+  })
+}
+
 // ── CSV parser ─────────────────────────────────────────────────────────────
 
 function parseCSV(text: string): Record<string, string>[] {
@@ -285,7 +300,7 @@ function SwimlaneView({ events, stickyHeight, onEventClick, currentDate, current
                           {cellEvents.map(e => (
                             <p
                               key={e.idx}
-                              className="sl-line"
+                              className={['sl-line', e.event_zh.includes('宣布戒嚴') ? 'martial-law' : ''].filter(Boolean).join(' ')}
                               onClick={() => onEventClick(e)}
                             >
                               {e.event_zh}
@@ -692,12 +707,13 @@ export default function App() {
                event.time_known === 'true' &&
                toMinutes(event.time_local) <= currentMinutes)
             )
+            const isMartialLaw = event.event_zh.includes('宣布戒嚴')
             const locationParts = [event.city, event.place].filter(Boolean)
             nodes.push(
               <div
                 key={idx}
                 id={event.event_id}
-                className={['event', isActive ? 'active' : '', isPast ? 'past' : ''].filter(Boolean).join(' ')}
+                className={['event', isActive ? 'active' : '', isPast ? 'past' : '', isMartialLaw ? 'martial-law' : ''].filter(Boolean).join(' ')}
                 ref={isActive ? activeRef : null}
               >
                 <div className="event-meta">
@@ -722,7 +738,9 @@ export default function App() {
                   </button>
                 </div>
                 <p className="event-text">
-                  {renderWithRefs(event.event_zh, refMap, handleRef)}
+                  {isMartialLaw
+                    ? highlightKeyword(renderWithRefs(event.event_zh, refMap, handleRef), '宣布戒嚴', 'keyword-box')
+                    : renderWithRefs(event.event_zh, refMap, handleRef)}
                 </p>
                 {event.context_zh && (
                   <div className="event-context">

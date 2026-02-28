@@ -396,6 +396,78 @@ header h1 {
   white-space: nowrap;
 }
 
+/* ── Incident origin highlight ── */
+.event.origin {
+  background-color: #001818;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 8px,
+    rgba(0, 180, 180, 0.07) 8px,
+    rgba(0, 180, 180, 0.07) 16px
+  );
+  border-left: 4px solid #008888;
+  border-radius: 6px;
+  padding: 1.75rem 0.75rem;
+  border-bottom: 1px solid #004444;
+}
+
+.event.origin .event-time {
+  color: #00cccc;
+}
+
+.event.origin .event-text {
+  color: #99eeee;
+}
+
+.sl-line.origin {
+  color: #00aaaa;
+  font-weight: 700;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    rgba(0, 180, 180, 0.1) 4px,
+    rgba(0, 180, 180, 0.1) 8px
+  );
+}
+
+/* ── Massacre highlight ── */
+.event.massacre {
+  background-color: #1a0000;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 8px,
+    rgba(200, 0, 0, 0.1) 8px,
+    rgba(200, 0, 0, 0.1) 16px
+  );
+  border-left: 4px solid #cc0000;
+  border-radius: 6px;
+  padding: 1.75rem 0.75rem;
+  border-bottom: 1px solid #440000;
+}
+
+.event.massacre .event-time {
+  color: #ff4444;
+}
+
+.event.massacre .event-text {
+  color: #ffaaaa;
+}
+
+.sl-line.massacre {
+  color: #ff4444;
+  font-weight: 700;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    rgba(200, 0, 0, 0.12) 4px,
+    rgba(200, 0, 0, 0.12) 8px
+  );
+}
+
 /* ── Martial law highlight ── */
 .event.martial-law {
   background-color: #1a0e00;
@@ -1090,6 +1162,37 @@ button.ref-num:hover {
   .event            { border-bottom-color: #e8e8e8; }
   .event.active     { background: #fff5f5; border-left-color: #cc0000; border-bottom-color: #f5cccc; }
   .keyword-box { border-color: #cc4400; color: #cc4400; background: rgba(200, 70, 0, 0.08); }
+  .event.massacre {
+    background-color: #fff0f0;
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 8px,
+      rgba(180, 0, 0, 0.06) 8px,
+      rgba(180, 0, 0, 0.06) 16px
+    );
+    border-left-color: #cc0000;
+    border-bottom-color: #ffcccc;
+  }
+  .event.massacre .event-time { color: #aa0000; }
+  .event.massacre .event-text { color: #550000; }
+  .sl-line.massacre { color: #aa0000; }
+
+  .event.origin {
+    background-color: #f0fafa;
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 8px,
+      rgba(0, 130, 130, 0.06) 8px,
+      rgba(0, 130, 130, 0.06) 16px
+    );
+    border-left-color: #007777;
+    border-bottom-color: #b0dddd;
+  }
+  .event.origin .event-time { color: #006666; }
+  .event.origin .event-text { color: #004444; }
+  .sl-line.origin { color: #007777; }
 
   .event.martial-law {
     background-color: #fff8f0;

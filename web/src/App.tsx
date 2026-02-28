@@ -300,7 +300,7 @@ function SwimlaneView({ events, stickyHeight, onEventClick, currentDate, current
                           {cellEvents.map(e => (
                             <p
                               key={e.idx}
-                              className={['sl-line', e.event_zh.includes('宣布戒嚴') ? 'martial-law' : ''].filter(Boolean).join(' ')}
+                              className={['sl-line', e.event_zh.includes('宣布戒嚴') ? 'martial-law' : '', e.event_zh.includes('到達現場') ? 'origin' : '', e.event_zh.includes('福州載運二千士兵') ? 'massacre' : ''].filter(Boolean).join(' ')}
                               onClick={() => onEventClick(e)}
                             >
                               {e.event_zh}
@@ -707,13 +707,15 @@ export default function App() {
                event.time_known === 'true' &&
                toMinutes(event.time_local) <= currentMinutes)
             )
-            const isMartialLaw = event.event_zh.includes('宣布戒嚴')
+            const isMartialLaw   = event.event_zh.includes('宣布戒嚴')
+            const isOrigin       = event.event_zh.includes('到達現場')
+            const isMassacre     = event.event_zh.includes('福州載運二千士兵')
             const locationParts = [event.city, event.place].filter(Boolean)
             nodes.push(
               <div
                 key={idx}
                 id={event.event_id}
-                className={['event', isActive ? 'active' : '', isPast ? 'past' : '', isMartialLaw ? 'martial-law' : ''].filter(Boolean).join(' ')}
+                className={['event', isActive ? 'active' : '', isPast ? 'past' : '', isMartialLaw ? 'martial-law' : '', isOrigin ? 'origin' : '', isMassacre ? 'massacre' : ''].filter(Boolean).join(' ')}
                 ref={isActive ? activeRef : null}
               >
                 <div className="event-meta">

@@ -228,7 +228,7 @@ function SwimlaneView({ events, stickyHeight, onEventClick, currentDate, current
 
   return (
     // Wrapper is the scroll container (both axes); top:0 sticky = right below sticky-bar
-    <div className="sl-wrapper" style={{ maxHeight: `calc(100vh - ${stickyHeight}px)` }}>
+    <div className="sl-wrapper" style={{ height: `calc(100vh - ${stickyHeight}px)` }}>
       <div
         className="sl-grid"
         style={{
@@ -555,7 +555,7 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className={viewMode === 'swimlane' ? 'app app--swimlane' : 'app'}>
 
       {/* ── Sticky bar: header + date nav ── */}
       <div className="sticky-bar" ref={stickyBarRef}>

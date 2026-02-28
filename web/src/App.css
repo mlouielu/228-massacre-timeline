@@ -6,6 +6,10 @@
   font-family: 'Noto Serif TC', 'Source Han Serif TC', serif, system-ui;
 }
 
+.app--swimlane {
+  padding-bottom: 0;
+}
+
 /* ── Sticky bar (header + date nav) ── */
 .sticky-bar {
   position: sticky;

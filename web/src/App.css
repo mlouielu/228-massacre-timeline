@@ -1,3 +1,56 @@
+/* ── Martial law indicator ── */
+.martial-law-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    #cc0000 0px, #cc0000 12px,
+    #1a0000 12px, #1a0000 18px
+  );
+  z-index: 1000;
+  animation: ml-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ml-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.martial-law-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1em;
+  text-align: center;
+  border: 1px solid rgba(204, 0, 0, 0.6);
+  border-radius: 3px;
+  padding: 0.25em 0.9em;
+  background: rgba(180, 0, 0, 0.12);
+  animation: ml-pulse 2s ease-in-out infinite;
+}
+
+.martial-law-badge-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #ff4444;
+}
+
+.martial-law-badge-meta {
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  color: #cc6666;
+}
+
+/* Subtle red tint on page background during martial law */
+.martial-law-active {
+  background: radial-gradient(ellipse at top, rgba(80, 0, 0, 0.18) 0%, transparent 60%);
+}
+
 /* ── Layout ── */
 .app {
   max-width: 860px;
@@ -135,8 +188,16 @@ header h1 {
 }
 
 /* ── Live banner ── */
-.live-banner {
+.header-banner-group {
   display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.3rem;
+  margin: 0 auto;
+}
+
+.live-banner {
+  display: flex;
   align-items: center;
   gap: 0.75rem;
   background: #1a0000;

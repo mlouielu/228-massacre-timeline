@@ -200,6 +200,17 @@ function labelFor(isoDate: string, showYear = false): string {
   return (showYear || y !== 1947) ? `${y}年${md}` : md
 }
 
+// ── Martial law periods ────────────────────────────────────────────────────
+
+const MARTIAL_LAW_PERIODS = [
+  { start: '1947-02-28', end: '1947-03-01', index: 1, label: '台北市臨時戒嚴令' },
+  { start: '1947-03-09', end: '1947-05-16', index: 2, label: '全省戒嚴令' },
+]
+
+function getMartialLawPeriod(isoDate: string) {
+  return MARTIAL_LAW_PERIODS.find(p => isoDate >= p.start && isoDate <= p.end) ?? null
+}
+
 // ── City → Region normalisation ────────────────────────────────────────────
 
 const CITY_NORMALIZE: Record<string, string> = {
@@ -693,8 +704,14 @@ export default function App() {
     popoverStyle = { top, left, width: POPOVER_W, maxHeight: POPOVER_MH }
   }
 
+  const anchorDate = anchorId ? events.find(e => e.event_id === anchorId)?.date : null
+  const martialLawPeriod = anchorDate ? getMartialLawPeriod(anchorDate) : null
+  const martialLawActive = martialLawPeriod !== null
+
   return (
-    <div className={viewMode === 'swimlane' ? 'app app--swimlane' : 'app'}>
+    <div className={[viewMode === 'swimlane' ? 'app app--swimlane' : 'app', martialLawActive ? 'martial-law-active' : ''].filter(Boolean).join(' ')}>
+
+      {martialLawActive && <div className="martial-law-bar" aria-label="戒嚴期間" />}
 
       {/* ── Sticky bar: header + date nav ── */}
       <div className="sticky-bar" ref={stickyBarRef}>
@@ -712,13 +729,27 @@ export default function App() {
           <h1>二二八大屠殺事件時間軸</h1>
           <p className="subtitle">1947年2月27日—5月16日・台灣</p>
 
-          {isHistoricalPeriod ? (
-            <div className="live-banner">
-              <span className="live-text">
-                <span className="live-title">歷史上的今天</span>
-                <span className="live-date">{labelFor(currentDate, true)}</span>
-              </span>
-              <div className="clock-row">
+          <div className="header-banner-group">
+            {isHistoricalPeriod ? (
+              <div className="live-banner">
+                <span className="live-text">
+                  <span className="live-title">歷史上的今天</span>
+                  <span className="live-date">{labelFor(currentDate, true)}</span>
+                </span>
+                <div className="clock-row">
+                  <span className="clock-item">
+                    <span className="clock-label">台灣時間</span>
+                    <span className="clock-value tw">{formatTaiwanClock(now)}</span>
+                  </span>
+                  <span className="clock-sep">/</span>
+                  <span className="clock-item">
+                    <span className="clock-label">{readerTZ}</span>
+                    <span className="clock-value">{formatReaderTime(now)}</span>
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="clock-row-static">
                 <span className="clock-item">
                   <span className="clock-label">台灣時間</span>
                   <span className="clock-value tw">{formatTaiwanClock(now)}</span>
@@ -729,20 +760,14 @@ export default function App() {
                   <span className="clock-value">{formatReaderTime(now)}</span>
                 </span>
               </div>
-            </div>
-          ) : (
-            <div className="clock-row-static">
-              <span className="clock-item">
-                <span className="clock-label">台灣時間</span>
-                <span className="clock-value tw">{formatTaiwanClock(now)}</span>
-              </span>
-              <span className="clock-sep">/</span>
-              <span className="clock-item">
-                <span className="clock-label">{readerTZ}</span>
-                <span className="clock-value">{formatReaderTime(now)}</span>
-              </span>
-            </div>
-          )}
+            )}
+            {martialLawPeriod && (
+              <div className="martial-law-badge">
+                <span className="martial-law-badge-title">⚠ 第{martialLawPeriod.index === 1 ? '一' : '二'}次戒嚴中</span>
+                <span className="martial-law-badge-meta">{martialLawPeriod.label}・{labelFor(martialLawPeriod.start, true)} — {labelFor(martialLawPeriod.end, true)}</span>
+              </div>
+            )}
+          </div>
         </header>
 
         <nav className="date-nav" ref={dateNavRef}>

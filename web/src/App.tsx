@@ -21,6 +21,7 @@ interface TimelineEvent {
   event_zh:        string
   source_chapter:  string
   context_zh:      string
+  source:          string   // source id, e.g. 'ey-1992', 'mmf2025'
 }
 
 interface RefPopover {
@@ -47,20 +48,42 @@ function highlightKeyword(nodes: ReactNode[], keyword: string, className: string
 // ── CSV parser ─────────────────────────────────────────────────────────────
 
 function parseCSV(text: string): Record<string, string>[] {
-  const lines = text.trim().split('\n')
-  const headers = lines[0].split(',')
-  return lines.slice(1).map(line => {
-    const fields: string[] = []
-    let cur = ''
-    let inQuote = false
-    for (const ch of line) {
-      if (ch === '"') { inQuote = !inQuote }
-      else if (ch === ',' && !inQuote) { fields.push(cur); cur = '' }
-      else { cur += ch }
+  // RFC 4180-compliant parser: handles quoted fields containing commas and newlines
+  const rows: string[][] = []
+  let fields: string[] = []
+  let cur = ''
+  let inQuote = false
+  // Normalise line endings
+  const s = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim()
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i]
+    if (inQuote) {
+      if (ch === '"') {
+        if (s[i + 1] === '"') { cur += '"'; i++ }   // escaped quote
+        else { inQuote = false }
+      } else {
+        cur += ch
+      }
+    } else {
+      if (ch === '"') {
+        inQuote = true
+      } else if (ch === ',') {
+        fields.push(cur); cur = ''
+      } else if (ch === '\n') {
+        fields.push(cur); cur = ''
+        rows.push(fields); fields = []
+      } else {
+        cur += ch
+      }
     }
-    fields.push(cur)
+  }
+  fields.push(cur)
+  rows.push(fields)
+
+  const headers = rows[0].map(h => h.trim())
+  return rows.slice(1).map(row => {
     const obj: Record<string, string> = {}
-    headers.forEach((h, i) => { obj[h.trim()] = (fields[i] ?? '').trim() })
+    headers.forEach((h, i) => { obj[h] = (row[i] ?? '').trim() })
     return obj
   })
 }
@@ -69,14 +92,15 @@ function parseCSV(text: string): Record<string, string>[] {
 
 function renderWithRefs(
   text: string,
-  refMap: Map<number, string>,
+  source: string,
+  refMap: Map<string, string>,
   onRef: (id: number, text: string, rect: DOMRect) => void,
 ): ReactNode[] {
   return text.split(/(\[\d+\])/).map((part, i) => {
     const m = part.match(/^\[(\d+)\]$/)
     if (!m) return part
     const id = parseInt(m[1], 10)
-    const refText = refMap.get(id)
+    const refText = refMap.get(`${source}:${id}`)
     if (!refText) return <span key={i} className="ref-num">{part}</span>
     return (
       <button
@@ -129,18 +153,40 @@ function formatTaiwanClock(d: Date): string {
   return toTaiwanTime(d).hhmmss
 }
 
-// ── Report source ──────────────────────────────────────────────────────────
+// ── Report sources ─────────────────────────────────────────────────────────
 
-const REPORT_SOURCE = {
-  label:     '行政院1992報告版',
-  title:     '「二二八事件」研究報告',
-  author:    '行政院研究二二八事件小組',
-  publisher: '財團法人二二八事件紀念基金會',
-  description: '1991年行政院成立二二八研究小組，重新撰寫二二八事件調查報告，於1992年2月公開內容。此報告已修改過去「暴動」、「暴民」之說，對事件發生的經過敘述詳細，但囿於當時政治環境，未能觸及二二八責任歸屬的問題。- 二二八事件責任歸屬研究報告。',
-  links: [
-    { label: '行政院《「二二八事件」研究報告》摘要 - 財團法人二二八事件紀念基金會', url: 'https://www.228.org.tw/incident-research1' },
-    { label: '行政院「二二八事件」研究報告 - 電子書（Kobo）ISBN 978-626-995-170-3',  url: 'https://www.kobo.com/tw/zh/ebook/GcO8yoYwjzSAmClmFn8INA' },
-  ],
+interface SourceMeta {
+  label:       string
+  title:       string
+  author:      string
+  publisher:   string
+  description: string
+  links:       { label: string; url: string }[]
+}
+
+const SOURCES: Record<string, SourceMeta> = {
+  'ey-1992': {
+    label:       '行政院1992報告',
+    title:       '「二二八事件」研究報告',
+    author:      '行政院研究二二八事件小組',
+    publisher:   '財團法人二二八事件紀念基金會',
+    description: '1991年行政院成立二二八研究小組，重新撰寫二二八事件調查報告，於1992年2月公開內容。此報告已修改過去「暴動」、「暴民」之說，對事件發生的經過敘述詳細，但囿於當時政治環境，未能觸及二二八責任歸屬的問題。',
+    links: [
+      { label: '行政院《「二二八事件」研究報告》摘要 - 財團法人二二八事件紀念基金會', url: 'https://www.228.org.tw/incident-research1' },
+      { label: '行政院「二二八事件」研究報告 - 電子書（Kobo）ISBN 978-626-995-170-3',  url: 'https://www.kobo.com/tw/zh/ebook/GcO8yoYwjzSAmClmFn8INA' },
+    ],
+  },
+  'mmf2025': {
+    label:       '基金會2005報告',
+    title:       '二二八事件責任歸屬研究報告',
+    author:      '財團法人二二八事件紀念基金會',
+    publisher:   '財團法人二二八事件紀念基金會',
+    description: '財團法人二二八事件紀念基金會於2025年重新出版之二二八責任歸屬研究報告版本。',
+    links: [
+        { label: '財團法人二二八事件紀念基金會', url: 'https://www.228.org.tw/' },
+      { label: '二二八事件責任歸屬研究報告 - 電子書（Kobo）ISBN 978-626-995-170-3',  url: 'https://www.kobo.com/tw/zh/ebook/ig97vlbaaz65yvbafnjhfa' },
+    ],
+  },
 }
 
 // ── Date labels ────────────────────────────────────────────────────────────
@@ -338,7 +384,7 @@ function SwimlaneView({ events, stickyHeight, onEventClick, currentDate, current
 
 export default function App() {
   const [events, setEvents]             = useState<TimelineEvent[]>([])
-  const [refMap, setRefMap]             = useState<Map<number, string>>(new Map())
+  const [refMap, setRefMap]             = useState<Map<string, string>>(new Map())
   const [now, setNow]                   = useState(new Date())
   const [activeId, setActiveId]         = useState<number | null>(null)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
@@ -349,7 +395,7 @@ export default function App() {
   const [copiedId, setCopiedId]         = useState<string | null>(null)
   const [expandedCtx, setExpandedCtx]   = useState<Set<string>>(new Set())
   const [aboutOpen, setAboutOpen]        = useState(false)
-  const [sourceOpen, setSourceOpen]      = useState<string | null>(null)
+  const [sourceOpen, setSourceOpen]      = useState<{ eventId: string; source: string } | null>(null)
   const [viewMode, setViewMode]          = useState<'timeline' | 'swimlane'>('timeline')
   const [slDetail, setSlDetail]          = useState<(TimelineEvent & { idx: number }) | null>(null)
   const activeRef       = useRef<HTMLDivElement | null>(null)
@@ -360,25 +406,55 @@ export default function App() {
   const hasScrolledHash = useRef(false)
   const hashLockRef     = useRef(false)
 
-  // Load timeline CSV
+  // Load timeline CSVs (all known sources; missing files are silently skipped)
   useEffect(() => {
-    fetch(`${import.meta.env.BASE_URL}sources/ey-1992/timeline.csv`)
-      .then(r => r.text())
-      .then(t => setEvents(parseCSV(t) as unknown as TimelineEvent[]))
+    // Short prefix per source to namespace event IDs (e.g. EY-E0001, MF-E0001)
+    const SOURCE_PREFIX: Record<string, string> = {
+      'ey-1992': 'EY',
+      'mmf2025': 'MF',
+    }
+    const load = (sourceId: string) => {
+      const prefix = SOURCE_PREFIX[sourceId] ?? sourceId.toUpperCase()
+      return fetch(`${import.meta.env.BASE_URL}sources/${sourceId}/timeline.csv`)
+        .then(r => r.ok ? r.text() : null)
+        .then(t => t
+          ? (parseCSV(t) as unknown as TimelineEvent[]).map(e => ({
+              ...e,
+              source:   sourceId,
+              event_id: `${prefix}-${e.event_id}`,
+            }))
+          : [])
+        .catch(() => [] as TimelineEvent[])
+    }
+
+    Promise.all([load('ey-1992'), load('mmf2025')]).then(([a, b]) => {
+      const merged = [...a, ...b]
+      const precRank = (e: TimelineEvent) => e.time_precision === 'exact' ? 0 : 1
+      merged.sort((x, y) => {
+        const dateCmp = x.date.localeCompare(y.date)
+        if (dateCmp !== 0) return dateCmp
+        const timeCmp = (x.time_local || '12:00').localeCompare(y.time_local || '12:00')
+        if (timeCmp !== 0) return timeCmp
+        return precRank(x) - precRank(y)
+      })
+      setEvents(merged)
+    })
   }, [])
 
-  // Load references CSV
+  // Load references CSVs (namespaced by source to avoid ID collisions)
   useEffect(() => {
-    fetch(`${import.meta.env.BASE_URL}sources/ey-1992/references.csv`)
-      .then(r => r.text())
-      .then(t => {
-        const rows = parseCSV(t)
-        const map = new Map<number, string>()
-        for (const row of rows) {
-          map.set(parseInt(row.ref_id, 10), row.text)
-        }
-        setRefMap(map)
-      })
+    const load = (sourceId: string) =>
+      fetch(`${import.meta.env.BASE_URL}sources/${sourceId}/references.csv`)
+        .then(r => r.ok ? r.text() : null)
+        .then(t => {
+          if (!t) return []
+          return parseCSV(t).map(row => [`${sourceId}:${row.ref_id}`, row.text] as [string, string])
+        })
+        .catch(() => [] as [string, string][])
+
+    Promise.all([load('ey-1992'), load('mmf2025')]).then(([a, b]) => {
+      setRefMap(new Map([...a, ...b]))
+    })
   }, [])
 
   // Tick every second for the live clock
@@ -426,6 +502,9 @@ export default function App() {
   // Compute filtered list early — used in effects below
   const allDates = [...new Set(events.map(e => e.date))].sort()
 
+  // Normalise 臺→台 so both variants match the same city
+  const normCity = (s: string) => s.replace(/臺/g, '台')
+
   // Cities ordered geographically: North → Central → South → East → Islands
   const CITY_ORDER = [
     '台北市','基隆市','淡水','宜蘭','桃園縣','新竹縣','新竹市','苗栗',
@@ -434,12 +513,12 @@ export default function App() {
     '花蓮','台東',
     '澎湖',
   ]
-  const allCities = CITY_ORDER.filter(c => events.some(e => e.city === c))
+  const allCities = CITY_ORDER.filter(c => events.some(e => normCity(e.city) === c))
 
   const filteredEvents = events
     .map((e, i) => ({ ...e, idx: i }))
     .filter(e => selectedDate === null || e.date === selectedDate)
-    .filter(e => selectedCity === null || e.city === selectedCity)
+    .filter(e => selectedCity === null || normCity(e.city) === selectedCity)
 
   // Swimlane ignores city filter — showing all regions is the point
   const swimlaneEvents = events
@@ -756,10 +835,10 @@ export default function App() {
                     <span className="event-region">{event.region}</span>
                   )}
                   <button
-                    className="source-badge"
-                    onClick={e => { e.stopPropagation(); setSourceOpen(event.event_id) }}
-                    title={REPORT_SOURCE.title}
-                  >{REPORT_SOURCE.label}</button>
+                    className={`source-badge source-badge--${event.source}`}
+                    onClick={e => { e.stopPropagation(); setSourceOpen({ eventId: event.event_id, source: event.source }) }}
+                    title={SOURCES[event.source]?.title ?? event.source}
+                  >{SOURCES[event.source]?.label ?? event.source}</button>
                   <button
                     className={['event-anchor', copiedId === event.event_id ? 'copied' : ''].filter(Boolean).join(' ')}
                     onClick={() => copyLink(event.event_id)}
@@ -770,8 +849,8 @@ export default function App() {
                 </div>
                 <p className="event-text">
                   {isMartialLaw
-                    ? highlightKeyword(renderWithRefs(event.event_zh, refMap, handleRef), '宣布戒嚴', 'keyword-box')
-                    : renderWithRefs(event.event_zh, refMap, handleRef)}
+                    ? highlightKeyword(renderWithRefs(event.event_zh, event.source, refMap, handleRef), '宣布戒嚴', 'keyword-box')
+                    : renderWithRefs(event.event_zh, event.source, refMap, handleRef)}
                 </p>
                 {event.context_zh && (
                   <div className="event-context">
@@ -805,28 +884,31 @@ export default function App() {
       )}
 
       {/* ── Source modal ── */}
-      {sourceOpen && (
-        <div className="modal-backdrop" onClick={() => setSourceOpen(null)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <span className="modal-title"><span className="source-modal-event-id">{sourceOpen}</span> 資料來源：{REPORT_SOURCE.title}</span>
-              <button className="modal-close" onClick={() => setSourceOpen(null)}>×</button>
-            </div>
-            <div className="modal-body">
-              <p className="source-modal-meta"><span>著者</span>{REPORT_SOURCE.author}</p>
-              <p className="source-modal-meta"><span>出版</span>{REPORT_SOURCE.publisher}</p>
-              <p className="source-modal-desc">{REPORT_SOURCE.description}</p>
-              <ul className="source-modal-links">
-                {REPORT_SOURCE.links.map(l => (
-                  <li key={l.url}>
-                    <a href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a>
-                  </li>
-                ))}
-              </ul>
+      {sourceOpen && (() => {
+        const src = SOURCES[sourceOpen.source]
+        return (
+          <div className="modal-backdrop" onClick={() => setSourceOpen(null)}>
+            <div className="modal" onClick={e => e.stopPropagation()}>
+              <div className="modal-header">
+                <span className="modal-title"><span className="source-modal-event-id">{sourceOpen.eventId}</span> 資料來源：{src.title}</span>
+                <button className="modal-close" onClick={() => setSourceOpen(null)}>×</button>
+              </div>
+              <div className="modal-body">
+                <p className="source-modal-meta"><span>著者</span>{src.author}</p>
+                <p className="source-modal-meta"><span>出版</span>{src.publisher}</p>
+                <p className="source-modal-desc">{src.description}</p>
+                <ul className="source-modal-links">
+                  {src.links.map(l => (
+                    <li key={l.url}>
+                      <a href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* ── About modal ── */}
       {aboutOpen && (

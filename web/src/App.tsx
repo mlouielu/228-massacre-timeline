@@ -129,6 +129,19 @@ function formatTaiwanClock(d: Date): string {
   return toTaiwanTime(d).hhmmss
 }
 
+// ── Report source ──────────────────────────────────────────────────────────
+
+const REPORT_SOURCE = {
+  label:     '行政院版',
+  title:     '「二二八事件」研究報告',
+  author:    '行政院研究二二八事件小組',
+  publisher: '財團法人二二八事件紀念基金會',
+  links: [
+    { label: '行政院《「二二八事件」研究報告》摘要 - 財團法人二二八事件紀念基金會', url: 'https://www.228.org.tw/incident-research1' },
+    { label: '行政院「二二八事件」研究報告 - 電子書（Kobo）ISBN 978-626-995-170-3',  url: 'https://www.kobo.com/tw/zh/ebook/GcO8yoYwjzSAmClmFn8INA' },
+  ],
+}
+
 // ── Date labels ────────────────────────────────────────────────────────────
 
 const DATE_LABELS: Record<string, string> = {
@@ -335,6 +348,7 @@ export default function App() {
   const [copiedId, setCopiedId]         = useState<string | null>(null)
   const [expandedCtx, setExpandedCtx]   = useState<Set<string>>(new Set())
   const [aboutOpen, setAboutOpen]        = useState(false)
+  const [sourceOpen, setSourceOpen]      = useState<string | null>(null)
   const [viewMode, setViewMode]          = useState<'timeline' | 'swimlane'>('timeline')
   const [slDetail, setSlDetail]          = useState<(TimelineEvent & { idx: number }) | null>(null)
   const activeRef       = useRef<HTMLDivElement | null>(null)
@@ -741,6 +755,11 @@ export default function App() {
                     <span className="event-region">{event.region}</span>
                   )}
                   <button
+                    className="source-badge"
+                    onClick={e => { e.stopPropagation(); setSourceOpen(event.event_id) }}
+                    title={REPORT_SOURCE.title}
+                  >{REPORT_SOURCE.label}</button>
+                  <button
                     className={['event-anchor', copiedId === event.event_id ? 'copied' : ''].filter(Boolean).join(' ')}
                     onClick={() => copyLink(event.event_id)}
                     title="複製連結"
@@ -781,6 +800,29 @@ export default function App() {
             <button className="ref-popover-close" onClick={() => setPopover(null)}>×</button>
           </div>
           <p className="ref-popover-text">{popover.text}</p>
+        </div>
+      )}
+
+      {/* ── Source modal ── */}
+      {sourceOpen && (
+        <div className="modal-backdrop" onClick={() => setSourceOpen(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <span className="modal-title"><span className="source-modal-event-id">{sourceOpen}</span> 資料來源：{REPORT_SOURCE.title}</span>
+              <button className="modal-close" onClick={() => setSourceOpen(null)}>×</button>
+            </div>
+            <div className="modal-body">
+              <p className="source-modal-meta"><span>著者</span>{REPORT_SOURCE.author}</p>
+              <p className="source-modal-meta"><span>出版</span>{REPORT_SOURCE.publisher}</p>
+              <ul className="source-modal-links">
+                {REPORT_SOURCE.links.map(l => (
+                  <li key={l.url}>
+                    <a href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       )}
 

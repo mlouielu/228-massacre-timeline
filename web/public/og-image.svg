@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#141414"/>
+
+  <!-- Crimson top bar -->
+  <rect x="0" y="0" width="1200" height="14" fill="#bb0000"/>
+
+  <!-- Crimson bottom bar -->
+  <rect x="0" y="618" width="1200" height="12" fill="#bb0000"/>
+
+  <!-- Vertical side accents -->
+  <rect x="0" y="14" width="4" height="604" fill="#2a0000"/>
+  <rect x="1196" y="14" width="4" height="604" fill="#2a0000"/>
+
+  <!-- Main Chinese title -->
+  <text
+    x="600" y="285"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-weight="700"
+    font-size="96"
+    fill="#f0e8e8"
+    letter-spacing="8"
+  >二二八大屠殺事件時間軸</text>
+
+  <!-- Divider line -->
+  <line x1="200" y1="328" x2="1000" y2="328" stroke="#3a0000" stroke-width="1.5"/>
+
+  <!-- English subtitle -->
+  <text
+    x="600" y="390"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-weight="400"
+    font-size="42"
+    fill="#cc4444"
+    letter-spacing="3"
+  >228 Massacre Timeline</text>
+
+  <!-- Date range -->
+  <text
+    x="600" y="460"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="28"
+    fill="#666"
+    letter-spacing="2"
+  >1947年2月27日—5月16日・台灣</text>
+</svg>

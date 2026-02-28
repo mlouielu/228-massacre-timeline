@@ -384,7 +384,7 @@ export default function App() {
             >GitHub</a>
           </div>
           <h1>二二八大屠殺事件時間軸</h1>
-          <p className="subtitle">1947年2月27日—4月19日・台灣</p>
+          <p className="subtitle">1947年2月27日—5月16日・台灣</p>
 
           {isHistoricalPeriod ? (
             <div className="live-banner">

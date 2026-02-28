@@ -981,20 +981,39 @@ export default function App() {
             </div>
             <div className="modal-body">
               <p>本站為非商業、教育性質之歷史資料整理，時間軸內容依據以下來源整理：</p>
+
+              <p className="about-source-label">行政院1992報告版</p>
               <ul>
                 <li>
                   <a href="https://www.228.org.tw/incident-research1" target="_blank" rel="noopener noreferrer">
                     「二二八事件」研究報告
                   </a>
-                  <span className="modal-meta">財團法人二二八事件紀念基金會</span>
+                  <span className="modal-meta">著者：行政院研究二二八事件小組／出版：財團法人二二八事件紀念基金會</span>
                 </li>
                 <li>
                   <a href="https://www.kobo.com/tw/zh/ebook/GcO8yoYwjzSAmClmFn8INA" target="_blank" rel="noopener noreferrer">
                     電子書版本（Kobo）
                   </a>
+                  <span className="modal-meta">ISBN 978-626-995-170-3・行政院版原著作成於1992年</span>
+                </li>
+              </ul>
+
+              <p className="about-source-label">基金會2005報告版</p>
+              <ul>
+                <li>
+                  <a href="https://www.228.org.tw/" target="_blank" rel="noopener noreferrer">
+                    二二八事件責任歸屬研究報告
+                  </a>
+                  <span className="modal-meta">著者：財團法人二二八事件紀念基金會／初版：2006年2月</span>
+                </li>
+                <li>
+                  <a href="https://www.kobo.com/tw/zh/ebook/ig97vlbaaz65yvbafnjhfa" target="_blank" rel="noopener noreferrer">
+                    電子書版本（Kobo）
+                  </a>
                   <span className="modal-meta">ISBN 978-626-995-170-3</span>
                 </li>
               </ul>
+
               <p className="modal-notice">
                 本站依著作權法第65條（合理使用）原則引用原著作片段，原著作之著作權仍歸屬於財團法人二二八事件紀念基金會及原著作者。
               </p>

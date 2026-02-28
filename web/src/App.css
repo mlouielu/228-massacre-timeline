@@ -1058,6 +1058,17 @@ header h1 {
   padding-left: 0.65rem;
 }
 
+.about-source-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #888;
+  text-transform: uppercase;
+  margin: 0.9rem 0 0.2rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid #2a2a2a;
+}
+
 /* ── Jump-to-current FAB ── */
 .jump-btn {
   position: fixed;

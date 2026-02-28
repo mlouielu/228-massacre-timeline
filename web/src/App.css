@@ -159,14 +159,28 @@ header h1 {
   background: #300;
 }
 
+/* ── City row (city-nav + view-toggle on one line) ── */
+.city-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0 0.5rem;
+  border-top: 1px solid #1e1e1e;
+}
+
 /* ── City nav ── */
 .city-nav {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.3rem;
-  padding: 0 0 0.75rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+  min-width: 0;
+  padding: 0.35rem 0;
 }
+.city-nav::-webkit-scrollbar { display: none; }
 
 .city-nav-label {
   font-size: 0.65rem;
@@ -357,6 +371,227 @@ header h1 {
   line-height: 1.8;
   margin: 0;
   color: #ddd;
+}
+
+/* ── View toggle ── */
+.view-toggle {
+  display: flex;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.view-toggle button {
+  font-size: 0.72rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #333;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.view-toggle button:hover {
+  border-color: #666;
+  color: #aaa;
+}
+
+.view-toggle button.active {
+  background: #222;
+  border-color: #aaa;
+  color: #eee;
+  font-weight: 600;
+}
+
+/* ── Swimlane ── */
+.sl-wrapper {
+  overflow: auto;
+  margin: 0 -1rem;
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+
+.sl-grid {
+  display: grid;
+  min-width: max-content;
+}
+
+/* Header row */
+.sl-head {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  background: #141414;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #888;
+  text-align: center;
+  padding: 0.4rem 0.3rem;
+  border-bottom: 2px solid #b00;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.sl-head-corner {
+  position: sticky;
+  left: 0;
+  z-index: 9;
+}
+
+.sl-head-region {
+  border-left: 1px solid #222;
+}
+
+/* Date separator (full-width row) */
+.sl-date-sep {
+  position: sticky;
+  left: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #b00;
+  background: #1a0000;
+  padding: 0.3rem 0.5rem;
+  border-top: 1px solid #3a0000;
+  border-bottom: 1px solid #3a0000;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.sl-date-sep.current {
+  color: #e55;
+  background: #220000;
+  border-color: #600;
+}
+
+/* Hour label (sticky left) */
+.sl-hour-label {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: #141414;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #444;
+  padding: 0.3rem 0.3rem 0;
+  border-right: 1px solid #222;
+  border-bottom: 1px solid #1a1a1a;
+  display: flex;
+  align-items: flex-start;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sl-hour-label.current {
+  color: #e55;
+  background: #1a0000;
+  border-right-color: #600;
+}
+
+/* Event cell */
+.sl-cell {
+  border-left: 1px solid #1a1a1a;
+  border-bottom: 1px solid #1a1a1a;
+  padding: 0.25rem 0.3rem;
+  min-height: 24px;
+}
+
+.sl-cell.has-events {
+  background: #161616;
+}
+
+.sl-cell.current {
+  background: #1a0a0a;
+}
+
+/* One-liner event */
+.sl-line {
+  margin: 0;
+  font-size: 0.7rem;
+  color: #aaa;
+  line-height: 1.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  border-radius: 2px;
+  padding: 0 2px;
+  transition: background 0.1s, color 0.1s;
+}
+
+.sl-line:hover {
+  background: rgba(255,255,255,0.07);
+  color: #ddd;
+}
+
+/* Swimlane event detail modal */
+.sl-detail-modal {
+  max-width: 520px;
+}
+
+.sl-detail-loc {
+  font-weight: 400;
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.sl-detail-time {
+  font-size: 0.78rem;
+  color: #e55;
+  font-weight: 600;
+  margin: 0 0 0.6rem;
+}
+
+.sl-detail-text {
+  font-size: 0.85rem;
+  line-height: 1.85;
+  color: #ccc;
+  margin: 0 0 1rem;
+}
+
+.sl-detail-jump {
+  background: none;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #888;
+  font-family: inherit;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.sl-detail-jump:hover {
+  border-color: #b00;
+  color: #e55;
+}
+
+.sl-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sl-detail-anchor {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #444;
+  cursor: pointer;
+  padding: 0.35rem 0.5rem;
+  border-radius: 3px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.sl-detail-anchor:hover {
+  color: #e55;
+  background: rgba(255,255,255,0.06);
+}
+
+.sl-detail-anchor.copied {
+  color: #5a5;
 }
 
 /* ── Event context (原文) ── */
@@ -675,9 +910,8 @@ button.ref-num:hover {
     padding: 0.25rem 0.6rem;
   }
 
-  /* Date + city navs: horizontal scroll — no wrap, no vertical overflow */
-  .date-nav,
-  .city-nav {
+  /* Date nav: horizontal scroll */
+  .date-nav {
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
@@ -687,8 +921,7 @@ button.ref-num:hover {
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
-  .date-nav::-webkit-scrollbar,
-  .city-nav::-webkit-scrollbar { display: none; }
+  .date-nav::-webkit-scrollbar { display: none; }
   .date-nav button,
   .city-nav button {
     flex-shrink: 0;
@@ -696,7 +929,10 @@ button.ref-num:hover {
   }
   .date-nav button { padding: 0.35rem 0.65rem; }
   .city-nav button { padding: 0.25rem 0.55rem; }
-  .city-nav { padding-bottom: 0.55rem; }
+  .city-row { padding-bottom: 0.4rem; }
+
+  /* Swimlane wrapper bleeds on mobile too */
+  .sl-wrapper { margin: 0 -0.75rem; }
 
   /* Events */
   .event {
@@ -814,6 +1050,30 @@ button.ref-num:hover {
 
   .ref-num { color: #aaa; }
   button.ref-num:hover { color: #cc0000; }
+
+  .view-toggle button        { border-color: #ddd; color: #aaa; }
+  .view-toggle button:hover  { border-color: #999; color: #555; }
+  .view-toggle button.active { background: #f0f0f0; border-color: #888; color: #222; }
+  .city-row                  { border-top-color: #eee; }
+
+  .sl-head           { background: #fafafa; border-bottom-color: #cc0000; color: #aaa; }
+  .sl-head-corner    { background: #fafafa; }
+  .sl-hour-label     { background: #fafafa; color: #bbb; border-right-color: #eee; border-bottom-color: #eee; }
+  .sl-date-sep       { background: #fff5f5; color: #cc0000; border-color: #fcc; }
+  .sl-cell           { border-left-color: #eee; border-bottom-color: #eee; }
+  .sl-cell.has-events { background: #fefefe; }
+  .sl-line              { color: #444; }
+  .sl-line:hover        { background: rgba(0,0,0,0.05); color: #111; }
+  .sl-detail-time       { color: #cc0000; }
+  .sl-detail-text       { color: #333; }
+  .sl-detail-jump       { border-color: #ccc; color: #aaa; }
+  .sl-detail-jump:hover { border-color: #cc0000; color: #cc0000; }
+  .sl-detail-loc        { color: #aaa; }
+  .sl-detail-anchor     { color: #bbb; }
+  .sl-detail-anchor:hover { color: #cc0000; background: rgba(0,0,0,0.04); }
+  .sl-hour-label.current  { background: #fff5f5; color: #cc0000; border-right-color: #fcc; }
+  .sl-cell.current        { background: #fff8f8; }
+  .sl-date-sep.current    { background: #fff0f0; color: #cc0000; border-color: #fcc; }
 
   .header-link      { color: #bbb; }
   .header-link:hover { color: #555; }

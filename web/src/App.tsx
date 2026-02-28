@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback, type ReactNode } from 'react'
+import { useEffect, useState, useRef, useCallback, Fragment, type ReactNode } from 'react'
 import './App.css'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -134,6 +134,180 @@ function labelFor(isoDate: string): string {
   return DATE_LABELS[isoDate.slice(5)] ?? isoDate
 }
 
+// ── City → Region normalisation ────────────────────────────────────────────
+
+const CITY_NORMALIZE: Record<string, string> = {
+  // 台北
+  '台北市': '台北', '臺北市': '台北', '新北市': '台北',
+  '台北縣': '台北', '台北縣板橋鎮': '台北', '台北縣士林鎮': '台北',
+  '台北縣北投鎮': '台北', '台北縣新莊鎮': '台北', '台北縣新店鎮': '台北',
+  '台北縣淡水鎮': '台北', '台北縣瑞芳鎮': '台北', '台北縣汐止鎮': '台北',
+  '台北縣鶯歌鎮': '台北', '台北縣三峽鎮': '台北', '台北縣三重市': '台北',
+  // 基隆
+  '基隆市': '基隆',
+  // 宜蘭
+  '宜蘭市': '宜蘭', '宜蘭縣': '宜蘭', '羅東鎮': '宜蘭', '蘇澳鎮': '宜蘭',
+  // 桃園
+  '桃園縣': '桃園',
+  // 新竹
+  '新竹市': '新竹', '新竹縣': '新竹',
+  // 苗栗
+  '苗栗縣': '苗栗',
+  // 台中
+  '台中市': '台中', '中部地區': '台中',
+  '台中縣豐原區': '台中', '台中縣清水區': '台中', '台中縣大甲區': '台中',
+  '台中縣梧棲鎮': '台中', '台中縣沙鹿鎮': '台中', '台中縣東勢區': '台中',
+  '台中縣大肚鄉': '台中',
+  // 彰化
+  '彰化市': '彰化', '員林鎮': '彰化', '溪湖鎮': '彰化', '北斗區': '彰化',
+  // 南投
+  '南投縣草屯鎮': '南投', '南投縣竹山鎮': '南投', '南投縣埔里鎮': '南投',
+  '南投縣南投鎮': '南投', '南投縣集集鎮': '南投', '南投縣水里鄉': '南投',
+  // 雲林
+  '雲林縣': '雲林', '雲林縣虎尾鎮': '雲林', '雲林縣林內鄉': '雲林',
+  // 嘉義
+  '嘉義市': '嘉義', '嘉義縣': '嘉義',
+  // 台南
+  '台南市': '台南', '台南縣': '台南',
+  // 高雄
+  '高雄市': '高雄', '高雄縣': '高雄',
+  // 屏東
+  '屏東市': '屏東', '屏東縣': '屏東', '屏東縣林邊鄉': '屏東',
+  '屏東縣南州鄉': '屏東', '屏東縣東港': '屏東', '旗山': '屏東',
+  // 花蓮
+  '花蓮市': '花蓮', '花蓮縣': '花蓮',
+  // 台東
+  '台東縣': '台東',
+  // 澎湖
+  '澎湖縣': '澎湖',
+}
+
+const REGION_ORDER = [
+  '台北', '基隆', '宜蘭', '桃園', '新竹', '苗栗',
+  '台中', '彰化', '南投', '雲林', '嘉義',
+  '台南', '高雄', '屏東',
+  '花蓮', '台東', '澎湖',
+]
+
+// ── Swimlane view ──────────────────────────────────────────────────────────
+
+interface SwimlaneProps {
+  events:       (TimelineEvent & { idx: number })[]
+  stickyHeight: number
+  onEventClick: (e: TimelineEvent & { idx: number }) => void
+  currentDate:  string
+  currentHour:  number
+}
+
+function SwimlaneView({ events, stickyHeight, onEventClick, currentDate, currentHour }: SwimlaneProps) {
+  const normalized = events
+    .map(e => ({ ...e, region_col: CITY_NORMALIZE[e.city] ?? null }))
+    .filter(e => e.region_col !== null)
+
+  const activeRegions = REGION_ORDER.filter(r =>
+    normalized.some(e => e.region_col === r)
+  )
+
+  const allDates = [...new Set(normalized.map(e => e.date))].sort()
+
+  // Group: date → hour (0–23 | 'none') → region → events[]
+  type HourKey = number | 'none'
+  const byDate = new Map<string, Map<HourKey, Map<string, typeof normalized>>>()
+
+  for (const e of normalized) {
+    if (!byDate.has(e.date)) byDate.set(e.date, new Map())
+    const hourMap = byDate.get(e.date)!
+    const hour: HourKey = e.time_local ? Math.floor(toMinutes(e.time_local) / 60) : 'none'
+    if (!hourMap.has(hour)) hourMap.set(hour, new Map())
+    const regionMap = hourMap.get(hour)!
+    if (!regionMap.has(e.region_col!)) regionMap.set(e.region_col!, [])
+    regionMap.get(e.region_col!)!.push(e)
+  }
+
+  const cols = activeRegions.length
+
+  return (
+    // Wrapper scrolls both axes internally — this keeps position:sticky working
+    <div className="sl-wrapper" style={{ maxHeight: `calc(100vh - ${stickyHeight}px)` }}>
+      <div
+        className="sl-grid"
+        style={{
+          width: '100%',
+          gridTemplateColumns: `44px repeat(${cols}, 60px)`,
+        }}
+      >
+        {/* Sticky region header — top:0 within the scroll container */}
+        <div className="sl-head sl-head-corner" />
+        {activeRegions.map(r => (
+          <div key={r} className="sl-head sl-head-region">{r}</div>
+        ))}
+
+        {allDates.map(date => {
+          const hourMap = byDate.get(date)!
+          const hours = ([...hourMap.keys()] as HourKey[]).sort((a, b) => {
+            if (a === 'none') return -1
+            if (b === 'none') return 1
+            return (a as number) - (b as number)
+          })
+          const isCurrentDate = date === currentDate
+
+          return (
+            <Fragment key={date}>
+              <div
+                className={['sl-date-sep', isCurrentDate ? 'current' : ''].filter(Boolean).join(' ')}
+                style={{ gridColumn: `1 / span ${cols + 1}` }}
+              >
+                1947年{labelFor(date)}
+              </div>
+
+              {hours.map(hour => {
+                const regionMap = hourMap.get(hour)!
+                const label = hour === 'none' ? '—' : `${String(hour).padStart(2, '0')}時`
+                const isCurrentRow = isCurrentDate && hour === currentHour
+                return (
+                  <Fragment key={String(hour)}>
+                    <div
+                      id={`sl-row-${date}-${hour}`}
+                      className={['sl-hour-label', isCurrentRow ? 'current' : ''].filter(Boolean).join(' ')}
+                    >
+                      {label}
+                    </div>
+                    {activeRegions.map(region => {
+                      const cellEvents = (regionMap.get(region) ?? [])
+                        .slice()
+                        .sort((a, b) => toMinutes(a.time_local) - toMinutes(b.time_local))
+                      return (
+                        <div
+                          key={region}
+                          className={[
+                            'sl-cell',
+                            cellEvents.length ? 'has-events' : '',
+                            isCurrentRow ? 'current' : '',
+                          ].filter(Boolean).join(' ')}
+                        >
+                          {cellEvents.map(e => (
+                            <p
+                              key={e.idx}
+                              className="sl-line"
+                              onClick={() => onEventClick(e)}
+                            >
+                              {e.event_zh}
+                            </p>
+                          ))}
+                        </div>
+                      )
+                    })}
+                  </Fragment>
+                )
+              })}
+            </Fragment>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function App() {
@@ -149,6 +323,8 @@ export default function App() {
   const [copiedId, setCopiedId]         = useState<string | null>(null)
   const [expandedCtx, setExpandedCtx]   = useState<Set<string>>(new Set())
   const [aboutOpen, setAboutOpen]        = useState(false)
+  const [viewMode, setViewMode]          = useState<'timeline' | 'swimlane'>('timeline')
+  const [slDetail, setSlDetail]          = useState<(TimelineEvent & { idx: number }) | null>(null)
   const activeRef       = useRef<HTMLDivElement | null>(null)
   const todayRef        = useRef<HTMLDivElement | null>(null)
   const stickyBarRef    = useRef<HTMLDivElement | null>(null)
@@ -236,6 +412,11 @@ export default function App() {
     .map((e, i) => ({ ...e, idx: i }))
     .filter(e => selectedDate === null || e.date === selectedDate)
     .filter(e => selectedCity === null || e.city === selectedCity)
+
+  // Swimlane ignores city filter — showing all regions is the point
+  const swimlaneEvents = events
+    .map((e, i) => ({ ...e, idx: i }))
+    .filter(e => selectedDate === null || e.date === selectedDate)
 
   // Find the event on today's historical date whose time is closest to now
   useEffect(() => {
@@ -333,6 +514,12 @@ export default function App() {
   }
 
   function jumpToCurrent() {
+    if (viewMode === 'swimlane') {
+      const hour = Math.floor(currentMinutes / 60)
+      document.getElementById(`sl-row-${currentDate}-${hour}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      return
+    }
     setSelectedDate(null)
     setSelectedCity(null)    // ensure active event is in the rendered list
     if (activeId !== null) {
@@ -438,26 +625,48 @@ export default function App() {
           ))}
         </nav>
 
-        <nav className="city-nav">
-          <span className="city-nav-label">地區</span>
-          <button
-            className={selectedCity === null ? 'active' : ''}
-            onClick={() => setSelectedCity(null)}
-          >全部</button>
-          {allCities.map(c => (
+        <div className="city-row">
+          <nav className="city-nav">
+            <span className="city-nav-label">地區</span>
             <button
-              key={c}
-              className={selectedCity === c ? 'active' : ''}
-              onClick={() => setSelectedCity(prev => prev === c ? null : c)}
-            >
-              {c}
-            </button>
-          ))}
-        </nav>
+              className={selectedCity === null ? 'active' : ''}
+              onClick={() => setSelectedCity(null)}
+            >全部</button>
+            {allCities.map(c => (
+              <button
+                key={c}
+                className={selectedCity === c ? 'active' : ''}
+                onClick={() => setSelectedCity(prev => prev === c ? null : c)}
+              >
+                {c}
+              </button>
+            ))}
+          </nav>
+
+          <div className="view-toggle">
+            <button
+              className={viewMode === 'timeline' ? 'active' : ''}
+              onClick={() => setViewMode('timeline')}
+            >時間軸</button>
+            <button
+              className={viewMode === 'swimlane' ? 'active' : ''}
+              onClick={() => setViewMode('swimlane')}
+            >並行</button>
+          </div>
+        </div>
       </div>
 
-      {/* ── Timeline ── */}
-      <main className="timeline">
+      {/* ── Timeline / Swimlane ── */}
+      {viewMode === 'swimlane'
+        ? <SwimlaneView
+            events={swimlaneEvents}
+            stickyHeight={stickyHeight}
+            onEventClick={setSlDetail}
+            currentDate={currentDate}
+            currentHour={Math.floor(currentMinutes / 60)}
+          />
+        : null}
+      <main className="timeline" style={{ display: viewMode === 'timeline' ? undefined : 'none' }}>
         {(() => {
           const nodes: ReactNode[] = []
           let lastDate = ''
@@ -582,6 +791,53 @@ export default function App() {
                   github.com/mlouielu/228-massacre-timeline
                 </a>
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Swimlane event detail modal ── */}
+      {slDetail && (
+        <div className="modal-backdrop" onClick={() => setSlDetail(null)}>
+          <div className="modal sl-detail-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <span className="modal-title">
+                {slDetail.event_id}
+                {slDetail.city && <span className="sl-detail-loc">・{slDetail.city}{slDetail.place ? `・${slDetail.place}` : ''}</span>}
+              </span>
+              <button className="modal-close" onClick={() => setSlDetail(null)}>×</button>
+            </div>
+            <div className="modal-body">
+              {slDetail.time_precision === 'exact' && (
+                <p className="sl-detail-time">{labelFor(slDetail.date)} {formatTimeChinese(slDetail.time_local)}</p>
+              )}
+              {slDetail.time_precision === 'fuzzy' && slDetail.time_label && (
+                <p className="sl-detail-time">{labelFor(slDetail.date)} {slDetail.time_label}</p>
+              )}
+              <p className="sl-detail-text">{slDetail.event_zh}</p>
+              <div className="sl-detail-actions">
+                <button
+                  className="sl-detail-jump"
+                  onClick={() => {
+                    setSlDetail(null)
+                    setViewMode('timeline')
+                    setSelectedDate(null)
+                    setSelectedCity(null)
+                    setTimeout(() => {
+                      document.getElementById(slDetail.event_id)
+                        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    }, 50)
+                  }}
+                >
+                  在時間軸中查看 →
+                </button>
+                <button
+                  className={['sl-detail-anchor', copiedId === slDetail.event_id ? 'copied' : ''].filter(Boolean).join(' ')}
+                  onClick={() => copyLink(slDetail.event_id)}
+                >
+                  {copiedId === slDetail.event_id ? '✓ 已複製' : `# ${slDetail.event_id}`}
+                </button>
+              </div>
             </div>
           </div>
         </div>

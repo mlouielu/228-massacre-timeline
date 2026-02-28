@@ -274,9 +274,10 @@ interface SwimlaneProps {
   onEventClick: (e: TimelineEvent & { idx: number }) => void
   currentDate:  string
   currentHour:  number
+  wrapperRef:   React.RefObject<HTMLDivElement | null>
 }
 
-function SwimlaneView({ events, stickyHeight, onEventClick, currentDate, currentHour }: SwimlaneProps) {
+function SwimlaneView({ events, stickyHeight, onEventClick, currentDate, currentHour, wrapperRef }: SwimlaneProps) {
   const normalized = events
     .map(e => ({ ...e, region_col: CITY_NORMALIZE[e.city] ?? null }))
     .filter(e => e.region_col !== null)
@@ -305,7 +306,7 @@ function SwimlaneView({ events, stickyHeight, onEventClick, currentDate, current
 
   return (
     // Wrapper is the scroll container (both axes); top:0 sticky = right below sticky-bar
-    <div className="sl-wrapper" style={{ height: `calc(100vh - ${stickyHeight}px)` }}>
+    <div className="sl-wrapper" style={{ height: `calc(100vh - ${stickyHeight}px)` }} ref={wrapperRef}>
       <div
         className="sl-grid"
         style={{ gridTemplateColumns: `44px repeat(${cols}, 60px)` }}
@@ -406,8 +407,11 @@ export default function App() {
   const stickyBarRef    = useRef<HTMLDivElement | null>(null)
   const dateNavRef      = useRef<HTMLElement | null>(null)
   const popoverRef      = useRef<HTMLDivElement | null>(null)
+  const slWrapperRef    = useRef<HTMLDivElement | null>(null)
   const hasScrolledHash = useRef(false)
   const hashLockRef     = useRef(false)
+  const viewModeRef     = useRef(viewMode)
+  viewModeRef.current   = viewMode   // keep in sync on every render
 
   // Load timeline CSVs (all known sources; missing files are silently skipped)
   useEffect(() => {
@@ -582,6 +586,9 @@ export default function App() {
     if (events.length === 0) return
     let raf: number | null = null
     function onScroll() {
+      // Don't update anchor while swimlane is active — timeline events are
+      // display:none so their rects are all zero, which corrupts anchorId.
+      if (viewModeRef.current === 'swimlane') return
       if (raf !== null) return
       raf = requestAnimationFrame(() => {
         raf = null
@@ -607,6 +614,13 @@ export default function App() {
       if (raf !== null) cancelAnimationFrame(raf)
     }
   }, [events, stickyHeight])
+
+  // When entering swimlane, reset window scroll so sl-head sticky works from the start
+  useEffect(() => {
+    if (viewMode === 'swimlane') {
+      window.scrollTo(0, 0)
+    }
+  }, [viewMode])
 
   // On mobile, scroll date nav so today's / active button is visible
   useEffect(() => {
@@ -651,11 +665,62 @@ export default function App() {
     })
   }
 
+  // Shared helper: scroll sl-wrapper to the hour row closest to `hour` on `date`
+  function scrollSwimlaneToDate(date: string, hour: number) {
+    const wrapper = slWrapperRef.current
+    if (!wrapper) return
+    const prefix = `sl-row-${date}-`
+    const rows = Array.from(wrapper.querySelectorAll<HTMLElement>(`[id^="${prefix}"]`))
+    if (rows.length === 0) return
+    const closest = rows.reduce((best, el) => {
+      const suffix    = el.id.slice(prefix.length)
+      const rowHour   = suffix === 'none' ? 0 : parseInt(suffix, 10)
+      const bestSuffix = best.id.slice(prefix.length)
+      const bestHour  = bestSuffix === 'none' ? 0 : parseInt(bestSuffix, 10)
+      return Math.abs(rowHour - hour) < Math.abs(bestHour - hour) ? el : best
+    })
+    const headHeight  = wrapper.querySelector<HTMLElement>('.sl-head')?.getBoundingClientRect().height ?? 0
+    const wrapperRect = wrapper.getBoundingClientRect()
+    const targetRect  = closest.getBoundingClientRect()
+    wrapper.scrollTo({ top: wrapper.scrollTop + targetRect.top - wrapperRect.top - headHeight, behavior: 'smooth' })
+  }
+
+  function switchToSwimlane() {
+    setViewMode('swimlane')
+    // After SwimlaneView mounts, jump to anchor event's row (or current time)
+    setTimeout(() => {
+      const anchorEvent = events.find(e => e.event_id === anchorId)
+      if (anchorEvent) {
+        const hour = anchorEvent.time_local ? Math.floor(toMinutes(anchorEvent.time_local) / 60) : 0
+        scrollSwimlaneToDate(anchorEvent.date, hour)
+      } else if (isHistoricalPeriod) {
+        scrollSwimlaneToDate(currentDate, Math.floor(currentMinutes / 60))
+      }
+    }, 100)
+  }
+
+  function switchToTimeline() {
+    setViewMode('timeline')
+    // After timeline re-shows, jump back to the anchor event (or active event)
+    setTimeout(() => {
+      const targetId = anchorId ?? (activeId !== null ? events[activeId]?.event_id : null)
+      if (targetId) {
+        document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }, 50)
+  }
+
   function jumpToCurrent() {
     if (viewMode === 'swimlane') {
-      const hour = Math.floor(currentMinutes / 60)
-      document.getElementById(`sl-row-${currentDate}-${hour}`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      if (isHistoricalPeriod) {
+        scrollSwimlaneToDate(currentDate, Math.floor(currentMinutes / 60))
+      } else if (anchorId) {
+        const anchorEvent = events.find(e => e.event_id === anchorId)
+        if (anchorEvent) {
+          const hour = anchorEvent.time_local ? Math.floor(toMinutes(anchorEvent.time_local) / 60) : 0
+          scrollSwimlaneToDate(anchorEvent.date, hour)
+        }
+      }
       return
     }
     setSelectedDate(null)
@@ -822,11 +887,11 @@ export default function App() {
           <div className="view-toggle">
             <button
               className={viewMode === 'timeline' ? 'active' : ''}
-              onClick={() => setViewMode('timeline')}
+              onClick={switchToTimeline}
             >時間軸</button>
             <button
               className={viewMode === 'swimlane' ? 'active' : ''}
-              onClick={() => setViewMode('swimlane')}
+              onClick={switchToSwimlane}
             >並行</button>
           </div>
         </div>
@@ -840,6 +905,7 @@ export default function App() {
             onEventClick={setSlDetail}
             currentDate={currentDate}
             currentHour={Math.floor(currentMinutes / 60)}
+            wrapperRef={slWrapperRef}
           />
         : null}
       <main className="timeline" style={{ display: viewMode === 'timeline' ? undefined : 'none' }}>

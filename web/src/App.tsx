@@ -343,6 +343,7 @@ export default function App() {
   const dateNavRef      = useRef<HTMLElement | null>(null)
   const popoverRef      = useRef<HTMLDivElement | null>(null)
   const hasScrolledHash = useRef(false)
+  const hashLockRef     = useRef(false)
 
   // Load timeline CSV
   useEffect(() => {
@@ -453,6 +454,14 @@ export default function App() {
   useEffect(() => {
     if (!jumpPending) return
     activeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (activeId !== null) {
+      const eventId = events[activeId]?.event_id
+      if (eventId) {
+        hashLockRef.current = true
+        history.replaceState(null, '', '#' + eventId)
+        setTimeout(() => { hashLockRef.current = false }, 1200)
+      }
+    }
     setJumpPending(false)
   }, [jumpPending, filteredEvents])
 
@@ -473,7 +482,7 @@ export default function App() {
             break             // events are in DOM order, safe to stop early
           }
         }
-        if (current && window.location.hash !== '#' + current) {
+        if (current && window.location.hash !== '#' + current && !hashLockRef.current) {
           history.replaceState(null, '', '#' + current)
         }
       })

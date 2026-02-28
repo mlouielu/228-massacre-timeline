@@ -608,8 +608,10 @@ export default function App() {
   // Initial hash routing: scroll to event referenced in URL on first load
   useEffect(() => {
     if (hasScrolledHash.current || events.length === 0) return
-    const hash = window.location.hash.slice(1)
+    let hash = window.location.hash.slice(1)
     if (!hash) return
+    // Backwards-compat: bare #Exxxx → #EY-Exxxx
+    if (/^E\d+$/.test(hash)) hash = `EY-${hash}`
     hasScrolledHash.current = true
     setSelectedDate(null)
     setTimeout(() => {
